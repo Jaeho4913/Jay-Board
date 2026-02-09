@@ -10,4 +10,5 @@ public interface MemberMapper {
 	void save(MemberDTO memberDTO);
 	MemberDTO findById(Long userId);
 	MemberDTO findByUserId(String userId);
+	MemberDTO checkExistID(String id);
 }

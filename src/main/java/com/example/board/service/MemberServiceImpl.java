@@ -33,4 +33,8 @@ public class MemberServiceImpl implements MemberService{
 		}
 		return null;
 	}
+	@Override
+	public MemberDTO checkExistID(String id) {
+		return memberMapper.checkExistID(id);
+	}
 }
