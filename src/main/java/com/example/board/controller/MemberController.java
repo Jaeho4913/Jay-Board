@@ -41,6 +41,9 @@ public class MemberController {
 	@PostMapping("/save")
 	public String save(@ModelAttribute MemberDTO memberDTO, HttpServletRequest request) {
 		logger.info("회원가입 요청 : " + memberDTO.getUserId());
+		if (memberDTO.getUserId() == null || memberDTO.getUserId().trim().isEmpty()) {
+			return "member/save";
+		}
 		memberService.save(memberDTO);
 		HttpSession session = request.getSession();
 		session.setAttribute("loginMember", memberDTO);
@@ -84,5 +87,21 @@ public class MemberController {
 
 		logger.info("not exist id : " + userId);
 		return ResponseEntity.ok("notExistID");
+	}
+	@ResponseBody
+	@GetMapping("/checkEmail/{email}")
+	public ResponseEntity<String> checkExistEmail(@PathVariable("email") String email){
+
+		logger.info("중복 체크 요청 이메일:" + email);
+		MemberDTO member = memberService.checkExistEmail(email);
+
+		if (member != null && member.getEmail() != null) {
+			logger.info("exist email : " +  email);
+
+			return ResponseEntity.ok("email");
+		}
+
+		logger.info("not exist email : " + email);
+		return ResponseEntity.ok("notExistEmail");
 	}
 }

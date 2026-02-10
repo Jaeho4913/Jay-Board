@@ -9,4 +9,5 @@ public interface MemberService {
 	
 	MemberDTO login(LoginDTO loginDTO);
 	MemberDTO checkExistID(String id);
+	MemberDTO checkExistEmail(String email);
 }

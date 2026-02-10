@@ -21,7 +21,7 @@
 
 			<p>
 				<label>비밀번호 :</label>
-				<input type="text" name="password" placeholder="비밀번호를 입력하세요">
+				<input type="password" name="password" id="password" placeholder="비밀번호를 입력하세요">
 			</p>
 
 			<p>
@@ -31,10 +31,11 @@
 
 			<p>
 				<label>이메일 :</label>
-				<input type="text" name="email" placeholder="이메일을 입력하세요">
+				<input type="text" name="email" id="email"  data-check-result="fail"placeholder="이메일을 입력하세요">
+				<button type="button" onclick="checkEmail()">중복검사</button>
 			</p>
 
-			<button>가입하기</button>
+			<button type="submit">가입하기</button>
 		</form>
 
 		<button id="save">테스트</button>
@@ -45,14 +46,22 @@
 				$("#userId").on("input", function() {
 					$(this).attr("data-check-result", "fail");
 				});
+				$("#email").on("input", function() {
+					$(this).attr("data-check-result", "fail");
+				});
 			});
 			function checkId() {
 				 var userId = $("#userId").val().trim();
-				var $userIdInput = $("#userId");
-
-				 if (userId == "" ){
+				if (userId == "" ){
 					alert("아이디를 입력해주세요");
-					$userIdInput.focus();
+					$("#userId").focus();
+					return;
+				 }
+				 var idReg = /^[a-zA-Z0-9]{8,40}$/;
+
+				 if  (!idReg.test(userId)) {
+					alert("아이디는 한글 사용이 불가합니다.");
+					$("#userId").focus();
 					return;
 				 }
 				 $.ajax({
@@ -63,26 +72,84 @@
 						success: function(result){
 							if (result != "existID") {
 								alert("사용 가능한 아이디입니다.");
-								$userIdInput.attr("data-check-result", "success");
+								$("#userId").attr("data-check-result", "success");
 							} else {
 								alert("이미 사용 중인 아이디입니다.");
-								$userIdInput.val("").focus();
-								$userIdInput.attr("data-check-result", "fail");
+								$("#userId").attr("data-check-result", "fail");
+								$("#userId").val("").focus();
 							}
 						}
 				 });
 			}
+
+			function checkEmail() {
+				var email = $("#email").val().trim();
+				var emailReg = /^[a-zA-Z-0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+				if (email == "") {
+					alert("이메일을 입력해주세요.");
+					$("#email").focus();
+					return;
+				}
+				if (!emailReg.test(email)) {
+					alert("올바른 이메일 형식이 아닙니다.(한글 입력은 불가합니다.)");
+					$("#email").focus();
+					return;
+				}
+
+				$.ajax ({
+					type: "get",
+					url: "/member/checkEmail/" + email,
+					dataType: "text",
+					cache: false,
+					success: function(result){
+						if (result != "existEmail") {
+							alert("사용 가능한 이메일입니다.");
+							$("#email").attr("data-check-result", "success");
+						} else {
+							alert("이미 사용중인 이메일입니다.");
+							$("#email").attr("data-check-result", "fail");
+							$("#email").val("").focus();
+						}
+					}
+				});
+			}
 			function joinCheck() {
-				if ($("#userId").attr("data-check-result") != "success") {
-					alert("아이디 중복 검사를 먼저 해주세요!");
+
+				if ($("#userId").attr("data-check-result") == "fail") {
+					alert("아이디 중복 검사를 해주세요.");
 					$("#userId").focus();
+					return false;
+				}
+				var password = $("#password").val().trim();
+				var passwordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/;
+
+				if (!passwordReg.test(password)) {
+					alert("비밀번호는 8~20자의 영문 대/소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
+					$("#password").val("").focus();
+					return false;
+				}
+				var userName = $("#userName").val().trim();
+				var userNameReg = /^[가-힣a-zA-Z]+$/;
+
+				if (userName == "") {
+					$("#userName").focus();
+					return false;
+				}
+				if (!userNameReg.test(userName)) {
+					alert("이름에는 숫자나 특수문자 입력이 불가합니다.");
+					$("#userName").val("").focus();
+					return false;
+				}
+
+				if ($("#email").attr("data-check-result") == "fail") {
+					alert("이메일 중복 검사를 해주세요.");
+					$("#email").focus();
 					return false;
 				}
 				return true;
 			}
-
-			var name = $("#userName").val();
-			$("input[name=userName]").val();
+		//var name = $("#userName").val();
+		//$("input[name=userName]").val();
 
 
 		</script>

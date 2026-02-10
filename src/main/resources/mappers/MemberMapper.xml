@@ -16,5 +16,9 @@
 	<select id="checkExistID" parameterType="String" resultType="com.example.board.dto.MemberDTO">
 		SELECT * FROM members WHERE user_id = #{userId}
 	</select>
+
+	<select id= "checkExistEmail" parameterType="String" resultType="com.example.board.dto.MemberDTO">
+		SELECT * FROM members WHERE email = #{email}
+	</select>
 </mapper>
 

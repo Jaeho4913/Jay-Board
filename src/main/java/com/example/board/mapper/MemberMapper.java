@@ -11,4 +11,5 @@ public interface MemberMapper {
 	MemberDTO findById(Long userId);
 	MemberDTO findByUserId(String userId);
 	MemberDTO checkExistID(String id);
+	MemberDTO checkExistEmail(String email);
 }
