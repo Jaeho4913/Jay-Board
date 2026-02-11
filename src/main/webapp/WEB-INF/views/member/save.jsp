@@ -15,23 +15,23 @@
 
 			<p>
 				<label>아이디 :</label>
-				<input type="text" name="userId" id="userId" data-check-result="fail" placeholder="아이디를 입력하세요">
+				<input type="text" name="userId" id="userId" maxlength="50" data-check-result="fail" placeholder="아이디를 입력하세요">
 				<button type="button" onclick="checkId()">중복검사</button>
 			</p>
 
 			<p>
 				<label>비밀번호 :</label>
-				<input type="password" name="password" id="password" placeholder="비밀번호를 입력하세요">
+				<input type="password" name="password" id="password" maxlength="255" placeholder="비밀번호를 입력하세요">
 			</p>
 
 			<p>
 				<label>이름 :</label>
-				<input type="text" name="userName" id="userName" placeholder="이름을 입력하세요">
+				<input type="text" name="userName" id="userName" maxlength="50" placeholder ="이름을 입력하세요">
 			</p>
 
 			<p>
 				<label>이메일 :</label>
-				<input type="text" name="email" id="email"  data-check-result="fail"placeholder="이메일을 입력하세요">
+				<input type="text" name="email" id="email" maxlength="100" data-check-result="fail"  placeholder="이메일을 입력하세요">
 				<button type="button" onclick="checkEmail()">중복검사</button>
 			</p>
 
@@ -90,6 +90,13 @@
 					$("#email").focus();
 					return;
 				}
+
+				if  (email.length > 100) {
+					alert("이메일은 100자 이내여야 합니다.")
+					$("#email").focus();
+					return;
+				}
+
 				if (!emailReg.test(email)) {
 					alert("올바른 이메일 형식이 아닙니다.(한글 입력은 불가합니다.)");
 					$("#email").focus();
@@ -121,15 +128,15 @@
 					return false;
 				}
 				var password = $("#password").val().trim();
-				var passwordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/;
+				var passwordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,30}$/;
 
 				if (!passwordReg.test(password)) {
-					alert("비밀번호는 8~20자의 영문 대/소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
+					alert("비밀번호는 8~30자의 영문 대/소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
 					$("#password").val("").focus();
 					return false;
 				}
 				var userName = $("#userName").val().trim();
-				var userNameReg = /^[가-힣a-zA-Z]+$/;
+				var userNameReg = /^[가-힣a-zA-Z]{1,50}$/;
 
 				if (userName == "") {
 					$("#userName").focus();
