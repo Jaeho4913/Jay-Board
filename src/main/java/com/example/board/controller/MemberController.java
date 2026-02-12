@@ -104,4 +104,10 @@ public class MemberController {
 		logger.info("not exist email : " + email);
 		return ResponseEntity.ok("notExistEmail");
 	}
+	@ResponseBody
+	@GetMapping("/member/findId")
+	public ResponseEntity<String>findId(@PathVariable("id") String id) {
+
+		logger.info("id)
+	}
 }
