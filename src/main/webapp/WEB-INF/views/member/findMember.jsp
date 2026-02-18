@@ -61,7 +61,7 @@
 		$(".tab-btn").removeClass("active");
 		$("#" + tabName).addClass("active");
 		if(tabName === 'findId') $(".tab-btn:first").addClass("active");
-		else $(".tab-btn:last").addCalss("active");
+		else $(".tab-btn:last").addClass("active");
  		}
 
  		function findIdFunc() {
@@ -78,7 +78,7 @@
 				data: {"userName": name, "email": email},
 				dataType: "text",
 				success: function(result) {
-						if(result == "success") {
+						if(result != "fail") {
 							alert("회원님의 아이디는  [ " + result + " ] 입니다.");
 						} else {
 							alert("일치하는 회원 정보가 없습니다.");
@@ -102,7 +102,7 @@
 					data: {"userId": id, "userName": name, "email": email},
 					dataType: "text",
 					success: function(result) {
-							if(result == "success") {
+							if(result != "fail") {
 								alert("임시 비밀번호가 발급되었습니다: [ " + result + " ]\n로그인 후 비밀번호를 변경해주세요.");
 							} else {
 									alert("일치하는 회원 정보가 없습니다.");
