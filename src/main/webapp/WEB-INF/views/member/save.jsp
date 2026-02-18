@@ -36,9 +36,15 @@
 			</p>
 
 			<button type="submit">가입하기</button>
+		<c:if test="${not empty errorMessage}">
+			<script>
+					alert("${errorMessage}");
+			</script>
+		</c:if>
 		</form>
 
-		<button id="save">테스트</button>
+
+<!--		<button id="save">테스트</button>-->
 		<hr>
 		<a href="/member/login">이미 아이디가 있다면? 로그인하러 가기</a>
 		<script>

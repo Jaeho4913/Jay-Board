@@ -1,6 +1,7 @@
 package com.example.board.service;
 
 import java.util.Date;
+import java.util.UUID;
 
 import lombok.Data;
 
@@ -40,5 +41,21 @@ public class MemberServiceImpl implements MemberService{
 	@Override
 	public MemberDTO checkExistEmail(String email) {
 		return memberMapper.checkExistEmail(email);
+	}
+	@Override
+	public MemberDTO findId(MemberDTO memberDTO) {
+		return memberMapper.findId(memberDTO);
+	}
+	@Override
+	public MemberDTO findPw(MemberDTO memberDTO) {
+		MemberDTO member = memberMapper.checkMember(memberDTO);
+
+		if (member != null) {
+			String tempPw = UUID.randomUUID().toString().replace("-","").substring(0, 8);
+			member.setPassword(tempPw);
+			memberMapper.updatePassword(member);
+			return member;
+			}
+		return null;
 	}
 }

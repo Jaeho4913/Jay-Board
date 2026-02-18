@@ -79,16 +79,15 @@
 				dataType: "text",
 				success: function(result) {
 						if(result == "success") {
-							alert("회원님의 아이디는  [ " + reuslt + " ] 입니다.");
+							alert("회원님의 아이디는  [ " + result + " ] 입니다.");
 						} else {
 							alert("일치하는 회원 정보가 없습니다.");
 						}
 					}
-				}
-			});
- 		}
+				});
+			}
 
- 		function findPwfunc() {
+ 		function findPwFunc() {
 			var id = $("#userId_pw").val().trim();
 			var name = $("#userName_pw").val().trim();
 			var email = $("#email_pw").val().trim();

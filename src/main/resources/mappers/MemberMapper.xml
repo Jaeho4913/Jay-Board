@@ -20,5 +20,19 @@
 	<select id= "checkExistEmail" parameterType="String" resultType="com.example.board.dto.MemberDTO">
 		SELECT * FROM members WHERE email = #{email}
 	</select>
+	<select id= "findId" parameterType="com.example.board.dto.MemberDTO" resultType="com.example.board.dto.MemberDTO">
+		SELECT * FROM members
+		WHERE user_name = #{userName} AND email = #{email}
+	</select>
+		<select id= "checkMember" parameterType="com.example.board.dto.MemberDTO" resultType="com.example.board.dto.MemberDTO">
+		SELECT * FROM members
+		WHERE user_id = #{userId} AND user_name = #{userName} AND email = #{email}
+	</select>
+		<update id= "updatePassword" parameterType="com.example.board.dto.MemberDTO" >
+		UPDATE members
+		SET password = #{password}
+		WHERE user_id = #{userId}
+	</update>
+
 </mapper>
 

@@ -12,4 +12,8 @@ public interface MemberMapper {
 	MemberDTO findByUserId(String userId);
 	MemberDTO checkExistID(String id);
 	MemberDTO checkExistEmail(String email);
+	MemberDTO findId(MemberDTO memberDTO);
+	MemberDTO checkMember(MemberDTO memberDTO);
+	void updatePassword(MemberDTO memberDTO);
+	
 }

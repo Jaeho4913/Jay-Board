@@ -9,15 +9,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-
+import com.example.board.SecurityConfig;
 import com.example.board.dto.LoginDTO;
 import com.example.board.dto.MemberDTO;
 import com.example.board.service.MemberService;
@@ -27,10 +29,16 @@ import com.example.board.service.MemberServiceImpl;
 @Controller
 @RequestMapping("/member")
 public class MemberController {
+
+    private final SecurityConfig securityConfig;
 	private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
 
 	@Autowired
 	private MemberService memberService;
+
+    MemberController(SecurityConfig securityConfig) {
+        this.securityConfig = securityConfig;
+    }
 
 	@GetMapping("/save")
 	public String saveForm() {
@@ -39,16 +47,22 @@ public class MemberController {
 	}
 
 	@PostMapping("/save")
-	public String save(@ModelAttribute MemberDTO memberDTO, HttpServletRequest request) {
+	public String save(@ModelAttribute MemberDTO memberDTO, HttpServletRequest request, Model model) {
 		logger.info("회원가입 요청 : " + memberDTO.getUserId());
 		if (memberDTO.getUserId() == null || memberDTO.getUserId().trim().isEmpty()) {
 			return "member/save";
 		}
+		try {
 		memberService.save(memberDTO);
 		HttpSession session = request.getSession();
 		session.setAttribute("loginMember", memberDTO);
 		return "redirect:/";
+	} catch (DuplicateKeyException e) {
+		logger.error("중복 가입 시도 : " + e.getMessage());
+		model.addAttribute("errorMessage", "이미 사용 중인 아이디거나 이메일입니다.");
+		return "member/save";
 	}
+}
 
 	@GetMapping("/login")
 	public String loginGet() {
@@ -70,6 +84,10 @@ public class MemberController {
 	public String logout(HttpSession session) {
 		session.invalidate();
 		return "redirect:/";
+	}
+	@GetMapping("/find")
+	public String findMember() {
+		return "member/findMember";
 	}
 
 	@ResponseBody
@@ -105,9 +123,27 @@ public class MemberController {
 		return ResponseEntity.ok("notExistEmail");
 	}
 	@ResponseBody
-	@GetMapping("/member/findId")
-	public ResponseEntity<String>findId(@PathVariable("id") String id) {
+	@GetMapping("/findId")
+	public ResponseEntity<String> findId(@ModelAttribute MemberDTO memberDTO){
+		logger.info("findId : name={}, email={}", memberDTO.getUserName(), memberDTO.getEmail());
+		MemberDTO resultMember = memberService.findId(memberDTO);
 
-		logger.info("id)
+		if (resultMember != null && resultMember.getUserId() != null ) {
+			return ResponseEntity.ok(resultMember.getUserId());
+		} else {
+			return ResponseEntity.ok("fail");
+		}
+	}
+	@ResponseBody
+	@GetMapping("/findPw")
+	public ResponseEntity<String> findPw(@ModelAttribute MemberDTO memberDTO){
+		logger.info("findPw : id={}, name={}, email={}",memberDTO.getUserId(), memberDTO.getUserName(), memberDTO.getEmail());
+		MemberDTO resultMember = memberService.findPw(memberDTO);
+
+		if (resultMember != null && resultMember.getPassword() != null ) {
+			return ResponseEntity.ok(resultMember.getPassword());
+		} else {
+			return ResponseEntity.ok("fail");
+		}
 	}
 }
