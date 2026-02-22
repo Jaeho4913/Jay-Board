@@ -96,14 +96,17 @@
 					alert("모든 정보를 입력해주세요.")
 					return;
  				}
+
+				$("#findPwForm button").text("전송 중입니다...").prop("disabled", true);
 				$.ajax({
 					type: "get",
 					url: "/member/findPw",
 					data: {"userId": id, "userName": name, "email": email},
 					dataType: "text",
 					success: function(result) {
-							if(result != "fail") {
-								alert("임시 비밀번호가 발급되었습니다: [ " + result + " ]\n로그인 후 비밀번호를 변경해주세요.");
+							if(result == "success") {
+								alert("가입하신 이메일로 임시 비밀번호를 전송했습니다. \n이메일을 확인해주세요.");
+								location.href = "/member/login";
 							} else {
 									alert("일치하는 회원 정보가 없습니다.");
 							}

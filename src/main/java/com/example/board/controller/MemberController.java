@@ -140,8 +140,8 @@ public class MemberController {
 		logger.info("findPw : id={}, name={}, email={}",memberDTO.getUserId(), memberDTO.getUserName(), memberDTO.getEmail());
 		MemberDTO resultMember = memberService.findPw(memberDTO);
 
-		if (resultMember != null && resultMember.getPassword() != null ) {
-			return ResponseEntity.ok(resultMember.getPassword());
+		if (resultMember != null ) {
+			return ResponseEntity.ok("success");
 		} else {
 			return ResponseEntity.ok("fail");
 		}

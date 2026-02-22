@@ -17,6 +17,9 @@ public class MemberServiceImpl implements MemberService{
 
 	@Autowired
 	private MemberMapper memberMapper;
+	
+	@Autowired
+	private EmailService emailService;
 
 	@Override
 	public void save(MemberDTO memberDTO) {
@@ -54,6 +57,7 @@ public class MemberServiceImpl implements MemberService{
 			String tempPw = UUID.randomUUID().toString().replace("-","").substring(0, 8);
 			member.setPassword(tempPw);
 			memberMapper.updatePassword(member);
+			emailService.sendTempPasswordEmail(member.getEmail(), tempPw);
 			return member;
 			}
 		return null;
