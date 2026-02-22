@@ -35,6 +35,10 @@
 						<span style="font-size: 1.1em;">안녕하세요<strong>${sessionScope.loginMember.userName}</strong>님, 환영합니다!</span>
 
 						<div>
+							<button onclick="location.href='/member/updatePw'"
+								style="cursor: pointer; background-color: #ffc107; color: black; border: none; padding: 6px 12px; margin-right: 5px;">
+									비밀번호 변경
+							</button>
 							<button onclick="location.href='/write?page=${response.searchDTO.page}&searchType=${response.searchDTO.searchType}&keyword=${response.searchDTO.keyword}'"
 							        style="cursor: pointer; background-color: #28a745; color: white; border: none; padding: 6px 12px; margin-right: 5px;">
 								✏️ 글쓰기

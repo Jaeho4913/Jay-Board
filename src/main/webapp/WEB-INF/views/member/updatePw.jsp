@@ -44,6 +44,39 @@
 								return;
 							}
 
+							if (newPw !== newPwConfirm) {
+								alert("비밀번호가 일치하지 않습니다.")
+								$("#newPwConfirm").focus();
+								return;
+							}
 
+							if (currentPw === newPw) {
+								alert("기존 비밀번호와 동일합니다. 비밀번호를 다시 입력해주세요.")
+								$("#newPw").focus();
+								return;
+							}
+
+							var passwordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,30}$/;
+							if (!passwordReg.test(newPw)) {
+								alert("비밀번호는 8~30자의 영문 대/소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
+								return;
+							}
+
+							$.ajax ({
+										  type: "post",
+										  url: "/member/updatePw",
+										  data: { "currentPw": currentPw, "newPw": newPw},
+										  success: function(result) {
+														if (result === "success") {
+															alert("비밀번호가 변경되었습니다.")
+															location.href = "/member/login";
+															} else {
+																		alert("현재 비밀번호가 일치하지 않습니다.")
+																		$("#currentPw").val("").focus()
+																		}
+														}
+							})	;
 						}
 	</script>
+</body>
+</html>
