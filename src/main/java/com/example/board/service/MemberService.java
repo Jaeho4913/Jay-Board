@@ -12,4 +12,5 @@ public interface MemberService {
 	MemberDTO checkExistEmail(String email);
 	MemberDTO findId(MemberDTO memberDTO);
 	MemberDTO findPw(MemberDTO memberDTO);
+	boolean changePassword(String userId, String currentPw, String newPw);
 }

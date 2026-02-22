@@ -17,12 +17,17 @@ public class MemberServiceImpl implements MemberService{
 
 	@Autowired
 	private MemberMapper memberMapper;
-	
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	@Autowired
 	private EmailService emailService;
 
 	@Override
 	public void save(MemberDTO memberDTO) {
+		String encodedPw = passwordEncoder.encode(memberDTO.getPassword());
+		memberDTO.setPassword(encodedPw);
 		memberMapper.save(memberDTO);
 	}
 	@Override
@@ -31,7 +36,7 @@ public class MemberServiceImpl implements MemberService{
 
 		if(member != null) {
 
-			if (member.getPassword().equals(loginDTO.getPassword())) {
+			if (passwordEncoder.matches(loginDTO.getPassword(), member.getPassword())) {
 				return member;
 			}
 		}
@@ -55,11 +60,22 @@ public class MemberServiceImpl implements MemberService{
 
 		if (member != null) {
 			String tempPw = UUID.randomUUID().toString().replace("-","").substring(0, 8);
-			member.setPassword(tempPw);
+			member.setPassword(passwordEncoder.encode(tempPw));
 			memberMapper.updatePassword(member);
 			emailService.sendTempPasswordEmail(member.getEmail(), tempPw);
 			return member;
 			}
 		return null;
+	}
+	@Override
+	public boolean changePassword(String userId, String currentPw, String newPw) {
+		MemberDTO member = memberMapper.findByUserId(userId);
+		if (member != null && passwordEncoder.matches(currentPw, member.getPassword())) {
+			member.setPassword(passwordEncoder.encode(newPw));
+			memberMapper.updatePassword(member);
+
+			return true;
+		}
+		return false;
 	}
 }

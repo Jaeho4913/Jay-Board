@@ -80,6 +80,13 @@ public class MemberController {
 			return "member/login";
 		}
 	}
+	@GetMapping("/updatePw")
+	public String updatePwForm(HttpSession session) {
+		if (session.getAttribute("loginMember") == null) {
+			return "redirect:/member/login";
+		}
+		return "member/updatePw";
+	}
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 		session.invalidate();
@@ -141,6 +148,23 @@ public class MemberController {
 		MemberDTO resultMember = memberService.findPw(memberDTO);
 
 		if (resultMember != null ) {
+			return ResponseEntity.ok("success");
+		} else {
+			return ResponseEntity.ok("fail");
+		}
+	}
+	@ResponseBody
+	@PostMapping("/updatePw")
+	public ResponseEntity<String> updatePw(@RequestParam("currentPw") String currentPw,
+																   @RequestParam("newPw") String newPw, HttpSession session) {
+		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+		if (loginMember == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("fail");
+		}
+		boolean isChanged = memberService.changePassword(loginMember.getUserId(), currentPw, newPw);
+
+		if (isChanged) {
+			session.invalidate();
 			return ResponseEntity.ok("success");
 		} else {
 			return ResponseEntity.ok("fail");

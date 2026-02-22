@@ -15,5 +15,5 @@ public interface MemberMapper {
 	MemberDTO findId(MemberDTO memberDTO);
 	MemberDTO checkMember(MemberDTO memberDTO);
 	void updatePassword(MemberDTO memberDTO);
-	
+
 }
