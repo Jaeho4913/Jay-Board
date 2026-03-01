@@ -29,7 +29,7 @@
 						<input type="password" id="newPwConfirm" required placeholder="신규 비밀번호 한번 더 입력">
 					</p>
 					<button type="button" onclick="changePw()" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">변경하기</button>
-					<button type="button" onclick="history.back()" style="padding: 10px 20px;">취소</button>
+					<button type="button" onclick="location.href='/'" style="padding: 10px 20px;">취소</button>
 		</form>
 	</div>
 

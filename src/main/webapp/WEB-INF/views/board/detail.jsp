@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -14,7 +15,7 @@
 	</head>
 	<body>
 		<h2>📖 글 상세 보기</h2>
-		
+
 		<table>
 			<tr>
 				<th>번호</th>
@@ -39,11 +40,13 @@
 				</td>
 			</tr>
 		</table>
-	
+
 		<div class="btn-area">
 			<button onclick="location.href='/?page=${searchDTO.page}&keyword=${searchDTO.keyword}&searchType=${searchDTO.searchType}'">목록으로</button>
-			<button onclick="location.href='/board/update?idx=${board.idx}'">수정</button>
-			<button onclick="if(confirm('정말 삭제하시겠습니까?')) location.href='/board/delete?idx=${board.idx}'">삭제</button>
+			<c:if test="${not empty sessionScope.loginMember and sessionScope.loginMember.userName == board.writer}">
+				<button onclick="location.href='/board/update?idx=${board.idx}'">수정</button>
+				<button onclick="if(confirm('정말 삭제하시겠습니까?')) location.href='/board/delete?idx=${board.idx}'">삭제</button>
+			</c:if>
 		</div>
 	</body>
-<html>
+</html>
