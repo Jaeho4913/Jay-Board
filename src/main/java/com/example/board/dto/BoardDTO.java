@@ -3,15 +3,19 @@ package com.example.board.dto;
 import java.time.LocalDateTime;
 
 public class BoardDTO {
-    private Long idx;            
-    private String title;        
-    private String content;      
-    private String writer;       
-    private int viewCnt;         
-    private LocalDateTime createdAt; 
-    private LocalDateTime updatedAt; 
+    private Long idx;
+    private String title;
+    private String content;
+    private String writer;
+    private int viewCnt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String boardPw;
 
     // --- Getter/Setter ---
+
+    public String getBoardPw() { return boardPw; }
+    public void setBoardPw(String boardPw) { this.boardPw = boardPw; }
 
     public Long getIdx() { return idx; }
     public void setIdx(Long idx) { this.idx = idx; }

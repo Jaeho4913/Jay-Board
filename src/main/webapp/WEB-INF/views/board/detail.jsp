@@ -43,10 +43,35 @@
 
 		<div class="btn-area">
 			<button onclick="location.href='/?page=${searchDTO.page}&keyword=${searchDTO.keyword}&searchType=${searchDTO.searchType}'">목록으로</button>
-			<c:if test="${not empty sessionScope.loginMember and sessionScope.loginMember.userName == board.writer}">
-				<button onclick="location.href='/board/update?idx=${board.idx}'">수정</button>
-				<button onclick="if(confirm('정말 삭제하시겠습니까?')) location.href='/board/delete?idx=${board.idx}'">삭제</button>
-			</c:if>
+			<c:choose>
+				<c:when test="${not empty sessionScope.loginMember and sessionScope.loginMember.userName == board.writer}">
+					<button onclick="location.href='/board/update?idx=${board.idx}'">수정</button>
+					<button onclick="if(confirm('정말 삭제하시겠습니까?')) location.href='/board/delete?idx=${board.idx}'">삭제</button>
+				</c:when>
+
+				<c:otherwise>
+					<button onclick="guestUpdate()">수정</button>
+					<button onclick="guestDelete()">삭제</button>
+				</c:otherwise>
+			</c:choose>
+
+			<script>
+				function guestUpdate() {
+					var pw = prompt("글 작성 시 입력한 비밀번호를 입력하세요:");
+					if (pw) {
+						location.href = '/board/update?idx=${board.idx}&boardPw=' + pw;
+					}
+				}
+
+				function guestDelete() {
+					var pw = prompt("글 작성 시 입력한 비밀번호를 입력하세요:");
+					if (pw) {
+						if (confirm("정말 삭제하시겠습니까?")) {
+							location.href = '/board/delete?idx=${board.idx}&boardPw=' + pw;
+						}
+					}
+				}
+			</script>
 		</div>
 	</body>
 </html>

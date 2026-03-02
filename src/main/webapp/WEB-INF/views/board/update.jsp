@@ -15,16 +15,17 @@
 
     <form action="/board/update" method="post">
         <input type="hidden" name="idx" value="${board.idx}">
-        
+
         <label>제목</label>
         <input type="text" name="title" value="${board.title}" required>
-        
+
         <label>작성자</label>
         <input type="text" name="writer" value="${board.writer}" readonly>
-        
+
         <label>내용</label>
         <textarea name="content" rows="10">${board.content}</textarea>
-        
+
+        <input type="hidden" name="boardPw" value=${board.boardPw}">
         <button type="submit">수정 완료</button>
         <button type="button" onclick="history.back()">취소</button>
     </form>

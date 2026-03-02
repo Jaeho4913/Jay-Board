@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  
+
 <mapper namespace="com.example.board.mapper.BoardMapper">
-	
+
 	<select id="findAll" resultType="com.example.board.dto.BoardDTO">
 		SELECT * FROM tb_board
 		<where>
@@ -24,16 +24,16 @@
 		ORDER BY idx DESC
 		LIMIT #{size} OFFSET #{offset}
 	</select>
-	
+
 	<insert id="save" parameterType="com.example.board.dto.BoardDTO">
-		INSERT INTO tb_board (title, content, writer, view_cnt, created_at, updated_at)
-		Values (#{title}, #{content}, #{writer}, 0, NOW(), NOW())
+			INSERT INTO tb_board (title, content, writer, board_pw, view_cnt, created_at, updated_at)
+			Values (#{title}, #{content}, #{writer}, #{boardPw}, 0, NOW(), NOW())
 	</insert>
-	
+
 	<select id="findById" parameterType="Long" resultType="com.example.board.dto.BoardDTO">
 		SELECT * FROM tb_board WHERE idx = #{idx}
 	</select>
-	
+
 	<update id="update" parameterType="com.example.board.dto.BoardDTO">
 		UPDATE tb_board
 		SET title = #{title},
@@ -41,11 +41,11 @@
 			updated_at = NOW()
 		where idx = #{idx}
 	</update>
-	
+
 	<delete id="delete" parameterType="Long">
 		DELETE FROM tb_board WHERE idx = #{idx}
 	</delete>
-	
+
 	<select id="count" resultType="int">
 		SELECT count(*) FROM tb_board
 		<where>
@@ -64,5 +64,4 @@
 			</if>
 		</where>
 	</select>
-	
 </mapper>

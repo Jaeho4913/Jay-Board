@@ -35,7 +35,7 @@
 
 	<script>
 				function changePw() {
-							var currentPw = $("#currentPw").val().trim();
+							var currentPw = $("#currentPw").val().trim();`
 							var newPw = $("#newPw").val().trim();
 							var newPwConfirm = $("#newPwConfirm").val().trim();
 

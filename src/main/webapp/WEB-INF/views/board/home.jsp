@@ -17,12 +17,16 @@
 				<%--로그인을 안 했을 경우 (세션이 비어있음)--%>
 				<c:when test="${empty sessionScope.loginMember}">
 					<form action="/member/loginPost" method="post" style="display: flex; align-items: center; justify-content: center; gap: 10px">
-						<label>ID : <input type="text" name="userId" required style="width: 150px; margin:0; padding: 5px;
-						"></label>
+						<label>ID : <input type="text" name="userId" required style="width: 150px; margin:0; padding: 5px;"></label>
 						<label>PW : <input type="password" name="password" required style="width: 150px; margin:0; padding: 5px;"></label>
 
 						<button type="submit" style="cursor: pointer; background-color: #007bff; color: white; border: none; padding: 6px 12px;">로그인</button>
 						<button type="button" onclick="location.href= '/member/save'" style="cursor: pointer; background-color: #6c757d; color: white; border: none; padding: 6px 12px;">회원가입</button>
+
+						<button type="button" onclick="location.href='/write?page=${response.searchDTO.page}&searchType=${response.searchDTO.searchType}&keyword=${response.searchDTO.keyword}'"
+							style="cursor: pointer; background-color: #28a745; color: white; border: none; padding: 6px 12px;">
+						✏️ 글쓰기
+						</button>
 					</form>
 
 					<div style="margin-top: 10px; font-size: 0.9em;">
