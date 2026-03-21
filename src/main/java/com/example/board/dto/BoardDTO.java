@@ -11,6 +11,8 @@ public class BoardDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String boardPw;
+    private boolean isAuth;
+    private boolean isGuest;
 
     // --- Getter/Setter ---
 
@@ -37,4 +39,10 @@ public class BoardDTO {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public boolean getIsAuth() { return isAuth; }
+    public void setIsAuth(boolean isAuth) { this.isAuth = isAuth; }
+
+    public boolean getIsGuest() { return isGuest; }
+    public void setIsGuest(boolean isGuest) { this.isGuest = isGuest; }
 }

@@ -1,23 +1,25 @@
 package com.example.board.controller; // 패키지명
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.InitBinder;
 import jakarta.servlet.http.HttpSession;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.example.board.dto.BoardDTO;
 import com.example.board.dto.PageResponseDTO;
 import com.example.board.dto.SearchDTO;
 import com.example.board.service.BoardService;
-import com.example.board.dto.BoardDTO;
 import com.example.board.dto.MemberDTO;
 import com.example.board.validator.BoardValidator;
 import com.example.board.mapper.BoardMapper;
@@ -57,11 +59,7 @@ public class BoardController {
 		return "redirect:/";
 	}
 	@GetMapping("/board/view")
-    public String findById(@RequestParam("idx") Long idx,
-                           @ModelAttribute SearchDTO searchDTO,
-                           Model model) {
-		BoardDTO board = boardService.findById(idx);
-		model.addAttribute("board", board);
+    public String viewShell(@ModelAttribute SearchDTO searchDTO, Model model) {
 		model.addAttribute("searchDTO", searchDTO);
 		return "board/detail";
 	}
@@ -125,4 +123,37 @@ public class BoardController {
 		boardService.delete(idx);
 		return "redirect:/";
 	}
+	@ResponseBody
+	@GetMapping("/board/getDetail")
+	public ResponseEntity<BoardDTO> getBoardDetail(@RequestParam("idx") Long idx, HttpSession session) {
+		BoardDTO board = boardService.findById(idx);
+		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+
+		if (loginMember != null && loginMember.getUserName().equals(board.getWriter())) {
+			board.setIsAuth(true);
+		} else if (board.getBoardPw() != null && !board.getBoardPw().isEmpty()) {
+			board.setIsGuest(true);
+		}
+		return ResponseEntity.ok(board);
+	}
+	@ResponseBody
+	@PostMapping("/board/checkGuestPw")
+	public ResponseEntity<String> checkGuestPw(@RequestParam("idx") Long idx, @RequestParam("boardPw") String boardPw) {
+		BoardDTO board = boardService.findById(idx);
+		if (board != null && boardPw.equals(board.getBoardPw())) {
+			return ResponseEntity.ok("success");
+		}
+		return ResponseEntity.ok("fail");
+	}
+	@ResponseBody
+	@PostMapping("/board/deleteGuestPost")
+	public ResponseEntity<String> deleteGuestPost(@RequestParam("idx") Long idx, @RequestParam("boardPw") String boardPw) {
+		BoardDTO board = boardService.findById(idx);
+		if (board != null && boardPw.equals(board.getBoardPw())) {
+			boardService.delete(idx);
+			return ResponseEntity.ok("success");
+		}
+		return ResponseEntity.ok("fail");
+	}
 }
+
