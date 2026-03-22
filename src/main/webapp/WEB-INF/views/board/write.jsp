@@ -1,7 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="form" uri ="http://www.springframework.org/tags/form"%>
-<%@ taglib prefix="spring" uri ="http://www.springframework.org/tags"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
 <html>
@@ -14,77 +12,87 @@
         input, textarea { width: 100%; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
         button { padding: 10px 20px; }
     </style>
-
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 </head>
 <body>
-	<spring:hasBindErrors name="boardDTO">
-		<script>
-			var msg="";
-			<c:forEach var="error" items="${errors.allErrors}">
-				msg += "${error.defaultMessage}\n";
-			</c:forEach>
-			alert(msg);
-		</script>
-	</spring:hasBindErrors>
     <h2>✏️ 글 작성하기</h2>
-
-    <form:form action="/board/save" method="post" modelAttribute="boardDTO" onsubmit="return checkForm()">
-
+	<div id="wirteFormArea">
         <label>제목</label>
-        <form:input path="title" id="title" placeholder="제목을 입력하세요" />
+        <input type="text"  id="title" placeholder="제목을 입력하세요" />
 	<c:choose>
 		<c:when test="${not empty sessionScope.loginMember }">
         	<label>작성자</label>
-        	<form:input path="writer" id="writer" placeholder="작성자" readonly="true"/>
-			<form:hidden path="boardPw" id="boardPw" value="" /></c:when>
+        	<input type="text"  id="writer" value="${sessionScope.loginMember.userName}" readonly="readonly"/>
+			<input type="hidden" id="boardPw" value="" />
+			</c:when>
 		<c:otherwise>
 			<label>작성자(닉네임)</label>
-			<form:input path="writer" id="writer" placeholder="작성자 닉네임을 입력해주세요." />
+			<input type="text" id="writer" placeholder="작성자 닉네임을 입력해주세요." />
 			<label>글 비밀번호</label>
-			<form:password path="boardPw" id="boardPw" placeholder="수정/삭제 시 사용할 비밀번호를 입력해주세요." />
+			<input type="password" id="boardPw" placeholder="수정/삭제 시 사용할 비밀번호를 입력해주세요." />
 		</c:otherwise>
 	</c:choose>
 	<label>내용</label>
-	<form:textarea path="content" id="content" rows="10" placeholder="내용을 입력하세요" />
+	<textarea  id="content" rows="10" placeholder="내용을 입력하세요"></textarea>
+
 		<div style="margin-top: 10px;">
-			<button type="submit">등록</button>
-			<a href="/?page=${searchDTO.page}&searchType=${searchDTO.searchType}&keyword=${searchDTO.keyword}">
-				<button type="button">취소</button>
-			</a>
+			<button type="button" onclick="saveBoard()" style="background-color: #007bff; color: white; border: none;">등록</button>
+			<button type="button" onclick= "location.href='/?page=${searchDTO.page}&searchType=${searchDTO.searchType}&keyword=${searchDTO.keyword}'">취소</button>
 		</div>
-	</form:form>
+	</div>
 
 	<script>
-			function checkForm() {
-			var title = document.getElementById("title");
-					if (title.value.trim() == "") {
-						alert("제목을 입력해주세요.");
-						title.focus();
-						return false;
-						}
-			var writer = document.getElementById("writer");
-					if (writer.value.trim() == "") {
-						alert("작성자를 입력해주세요.");
-						writer.focus();
-						return false;
-						}
-			var boardPw = document.getElementById("boardPw");
-			if (boardPW && boardPw.type !== "hidden") {
-				if(boardPw.value.trim() == ""){
-					alert("게시글 비밀번호를 입력해주세요.");
-					boardPw.focus();
-					return false;
+			function saveBoard() {
+				var title = $("#title").val().trim();
+				var writer = $("#writer").val().trim();
+				var boardPw = $("#boardPw").val() ? $("#boardPw").val().trim(): "";
+				var content = $("#content").val().trim();
+
+				if (title === "") {
+					alert("제목을 입력해주세요.");
+					$("#title").focus();
+					return;
 				}
-			}
-			var content = document.getElementById("content");
-					if (content.value.trim() == "") {
-						alert("본문을 입력해주세요.");
-						content.focus();
-						return false;
-						}
-				return true;
-			}
+				if (writer === "") {
+					alert("작성자를 입력해주세요.");
+					$("#writer").focus();
+					return;
+				}
+				if($("#boardPw").attr("type") !== "hidden" && boardPw === "") {
+					alert("게시글 비밀번호를 입력해주세요.");
+					$("#boardPw").focus();
+					return;
+				}
+
+				if (content === "") {
+					alert("본문을 입력해주세요.");
+					$("#content").focus();
+					return;
+				}
+
+				$.ajax({
+					type: "POST",
+					url: "/board/save",
+					data: {
+						title: title,
+						writer: writer,
+						boardPw: boardPw,
+						content: content
+					},
+					success: function(result) {
+						if (result === "success") {
+							alert("게시글이 성공적으로 등록되었습니다!")
+							location.href = "/";
+					} else {
+						alert("게시글 등록에 실패했습니다.")
+					}
+				},
+				error: function(err) {
+					alert("서버 통신 중 오류가 발생.");
+				}
+			});
+		}
 			</script>
 </body>
 </html>

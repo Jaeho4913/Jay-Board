@@ -32,31 +32,13 @@ public class BoardController {
 	private BoardService boardService;
 
 	@GetMapping("/")
-	public String home(@ModelAttribute SearchDTO searchDTO, Model model) {
-		System.out.println("검색 조건 : " + searchDTO);
-		PageResponseDTO response = boardService.findAll(searchDTO);
-		model.addAttribute("response", response);
+	public String homeShell() {
 		return "board/home";
 	}
 	@GetMapping("/write")
-	public String writeForm(@ModelAttribute SearchDTO searchDTO, Model model, HttpSession session) {
-		BoardDTO boardDTO = new BoardDTO();
-		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-		if (loginMember != null) {
-			boardDTO.setWriter(loginMember.getUserName());
-		}
-		model.addAttribute("boardDTO", boardDTO);
+	public String writeForm(@ModelAttribute SearchDTO searchDTO, Model model) {
+		model.addAttribute("searchDTO", searchDTO);
 		return "board/write";
-	}
-	@PostMapping("/board/save")
-	public String save(@ModelAttribute BoardDTO boardDTO, BindingResult bindingResult, Model model) {
-		BoardValidator validator = new BoardValidator();
-		validator.validate(boardDTO, bindingResult);
-		if (bindingResult.hasErrors()) {
-			return "board/write";
-		}
-		boardService.save(boardDTO);
-		return "redirect:/";
 	}
 	@GetMapping("/board/view")
     public String viewShell(@ModelAttribute SearchDTO searchDTO, Model model) {
@@ -155,5 +137,27 @@ public class BoardController {
 		}
 		return ResponseEntity.ok("fail");
 	}
+	@ResponseBody
+	@GetMapping("/board/getList")
+	public ResponseEntity<Map<String, Object>> getList(@ModelAttribute SearchDTO searchDTO, HttpSession session) {
+		Map<String, Object> result = new HashMap<>();
+		PageResponseDTO pageResponse = boardService.findAll(searchDTO);
+		result.put("response", pageResponse);
+
+		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+		if (loginMember != null) {
+			result.put("isLogin", true);
+			result.put("userName", loginMember.getUserName());
+		} else {
+			result.put("isLogin",false);
+		}
+		return ResponseEntity.ok(result);
+	}
+@ResponseBody
+@PostMapping("/board/save")
+public ResponseEntity<String> save(BoardDTO boardDTO) {
+	boardService.save(boardDTO);
+	return ResponseEntity.ok("success");
+}
 }
 
