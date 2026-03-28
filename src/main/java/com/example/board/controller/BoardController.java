@@ -1,5 +1,6 @@
 package com.example.board.controller; // 패키지명
 
+import org.apache.jasper.tagplugins.jstl.core.If;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,7 +33,7 @@ public class BoardController {
 	private BoardService boardService;
 
 	@GetMapping("/")
-	public String homeShell() {
+	public String home() {
 		return "board/home";
 	}
 	@GetMapping("/write")
@@ -111,10 +112,13 @@ public class BoardController {
 		BoardDTO board = boardService.findById(idx);
 		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 
-		if (loginMember != null && loginMember.getUserName().equals(board.getWriter())) {
-			board.setIsAuth(true);
-		} else if (board.getBoardPw() != null && !board.getBoardPw().isEmpty()) {
+		if (board.getBoardPw() != null && !board.getBoardPw().isEmpty()) {
 			board.setIsGuest(true);
+		}
+		else {
+			if(loginMember != null && loginMember.getUserId().equals(board.getUserId())) {
+				board.setIsAuth(true);
+			}
 		}
 		return ResponseEntity.ok(board);
 	}
@@ -138,24 +142,29 @@ public class BoardController {
 		return ResponseEntity.ok("fail");
 	}
 	@ResponseBody
-	@GetMapping("/board/getList")
-	public ResponseEntity<Map<String, Object>> getList(@ModelAttribute SearchDTO searchDTO, HttpSession session) {
+	@GetMapping("/api/boards")
+	public ResponseEntity<Map<String, Object>> getBoardList(@ModelAttribute SearchDTO searchDTO, HttpSession session) {
 		Map<String, Object> result = new HashMap<>();
-		PageResponseDTO pageResponse = boardService.findAll(searchDTO);
-		result.put("response", pageResponse);
+		result.put("boardData", boardService.findAll(searchDTO));
 
 		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 		if (loginMember != null) {
 			result.put("isLogin", true);
-			result.put("userName", loginMember.getUserName());
-		} else {
-			result.put("isLogin",false);
-		}
-		return ResponseEntity.ok(result);
+			result.put("loginName", loginMember.getUserName());
+	} else {
+		result.put("isLogin", false);
 	}
+	return ResponseEntity.ok(result);
+}
+
 @ResponseBody
 @PostMapping("/board/save")
-public ResponseEntity<String> save(BoardDTO boardDTO) {
+public ResponseEntity<String> save(BoardDTO boardDTO, HttpSession session) {
+	MemberDTO loginMemberDTO = (MemberDTO) session.getAttribute("loginMember");
+
+	if(loginMemberDTO != null) {
+		boardDTO.setUserId(loginMemberDTO.getUserId());
+	}
 	boardService.save(boardDTO);
 	return ResponseEntity.ok("success");
 }

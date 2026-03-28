@@ -7,6 +7,7 @@ public class BoardDTO {
     private String title;
     private String content;
     private String writer;
+    private String user_id;
     private int viewCnt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -45,4 +46,8 @@ public class BoardDTO {
 
     public boolean getIsGuest() { return isGuest; }
     public void setIsGuest(boolean isGuest) { this.isGuest = isGuest; }
+
+    public String getUserId() {return getUserId();}
+    public void setUserId(String userId) {this.user_id= userId;}
 }
+	
