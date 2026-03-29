@@ -47,64 +47,8 @@ public class BoardController {
 		return "board/detail";
 	}
 	@GetMapping("/board/update")
-	public String updateForm(@RequestParam("idx") Long idx,
-										   @RequestParam(value = "boardPw", required = false) String boardPw,
-										   Model model, HttpSession session) {
-		BoardDTO board = boardService.findById(idx);
-		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-		boolean isAuth = false;
-
-		if (loginMember != null && loginMember.getUserName().equals(board.getWriter())) {
-			isAuth = true;
-		}
-		else if (boardPw != null && boardPw.equals(board.getBoardPw())) {
-			isAuth = true;
-		}
-
-		if (!isAuth) {
-			return "redirect:/board/view?idx=" + idx;
-		}
-
-		model.addAttribute("board", board);
+	public String updateForm() {
 		return "board/update";
-	}
-	@PostMapping("/board/update")
-		public String update(BoardDTO boardDTO, HttpSession session) {
-			BoardDTO originalBoard = boardService.findById(boardDTO.getIdx());
-			MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-
-			boolean isAuth = false;
-			if (loginMember != null && loginMember.getUserName().equals(originalBoard.getWriter())) {
-				isAuth = true;
-			} else if (boardDTO.getBoardPw() != null && boardDTO.getBoardPw().equals(originalBoard.getBoardPw())) {
-				isAuth = true;
-			}
-
-			if (!isAuth ) {
-				return "redirect:/board/view?idx=" + boardDTO.getIdx();
-			}
-			boardService.update(boardDTO);
-			return "redirect:/board/view?idx=" + boardDTO.getIdx();
-	}
-	@GetMapping("/board/delete")
-	public String delete(@RequestParam("idx") Long idx,
-								 @RequestParam(value = "boardPw", required = false) String boardPw,
-								 HttpSession session) {
-		BoardDTO board = boardService.findById(idx);
-		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-
-		boolean isAuth = false;
-		if( loginMember != null && loginMember.getUserName().equals(board.getWriter())) {
-			isAuth = true;
-		}else if ( boardPw != null && boardPw.equals(board.getBoardPw())) {
-			isAuth = true;
-		}
-
-		if (!isAuth) {
-			return "redirect:/board/view?idx=" + idx;
-		}
-		boardService.delete(idx);
-		return "redirect:/";
 	}
 	@ResponseBody
 	@GetMapping("/board/getDetail")
@@ -151,7 +95,7 @@ public class BoardController {
 		if (loginMember != null) {
 			result.put("isLogin", true);
 			String name = loginMember.getUserName();
-			if (name == null || name.trim().isEmpty()) {
+			if (name == null || name.isBlank()) {
 				name = loginMember.getUserId();
 				}
 				result.put("loginName", name);
@@ -172,5 +116,63 @@ public ResponseEntity<String> save(BoardDTO boardDTO, HttpSession session) {
 	boardService.save(boardDTO);
 	return ResponseEntity.ok("success");
 }
+@ResponseBody
+@PostMapping("/board/update")
+public ResponseEntity<String> update(BoardDTO boardDTO, HttpSession session) {
+	if (boardDTO.getIdx() == null) return ResponseEntity.ok("fail");
+	BoardDTO originalBoard = boardService.findById(boardDTO.getIdx());
+	if (originalBoard == null) return ResponseEntity.ok("fail");
+	MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+
+	boolean isAuth = false;
+	if (loginMember != null) {
+		String name = loginMember.getUserName();
+		if (name == null || name.isBlank()) {
+			name = loginMember.getUserId();
+		}
+		if (name.equals(originalBoard.getWriter())) {
+			isAuth = true;
+		}
+	} else if (boardDTO.getBoardPw() != null && boardDTO.getBoardPw().equals(originalBoard.getBoardPw())) {
+		isAuth = true;
+	}
+
+	if (!isAuth ) {
+		return ResponseEntity.ok("fail");
+	}
+
+	boardService.update(boardDTO);
+	return ResponseEntity.ok("success");
+}
+@ResponseBody
+@GetMapping("/board/delete")
+public ResponseEntity<String> delete(@RequestParam("idx") Long idx,
+							 							 @RequestParam(value = "boardPw", required = false) String boardPw,
+							 							 HttpSession session)
+{
+	BoardDTO board = boardService.findById(idx);
+	if (board == null) return ResponseEntity.ok("fail");
+	MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+
+	boolean isAuth = false;
+	if (loginMember != null) {
+		String name = loginMember.getUserName();
+		if (name == null || name.isBlank()) {
+			name = loginMember.getUserId();
+		}
+		if (name.equals(board.getWriter())) {
+			isAuth = true;
+		}
+	} else if (boardPw != null && boardPw.equals(board.getBoardPw())) {
+		isAuth = true;
+	}
+
+	if (!isAuth) {
+		return ResponseEntity.ok("fail");
+	}
+	boardService.delete(idx);
+	return ResponseEntity.ok("success");
+}
+
 }
 

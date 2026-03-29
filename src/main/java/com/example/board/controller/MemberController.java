@@ -123,7 +123,7 @@ public class MemberController {
 		if (member != null && member.getEmail() != null) {
 			logger.info("exist email : " +  email);
 
-			return ResponseEntity.ok("email");
+			return ResponseEntity.ok("existEmail");
 		}
 
 		logger.info("not exist email : " + email);

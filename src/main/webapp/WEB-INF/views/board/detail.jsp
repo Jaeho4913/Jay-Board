@@ -72,7 +72,7 @@
 
 				if (response.isAuth === true) {
 					let btnHtml = '<button onclick="location.href=\'/board/update?idx=' + idx +'\'">수정</button>' +
-										'<button onclick="if(confirm(\'정말 삭제하시겠습니까?\')) location.href=\'/board/delete?idx=' + idx + '\'">삭제</button>';
+										'<button onclick= "authDelete()">삭제</button>';
 					$("#authBtnArea").html(btnHtml);
 				} else if (response.isGuest === true) {
 					let btnHtml = '<button onclick="guestUpdate()">수정</button>' +
@@ -122,6 +122,28 @@
 					}
 				})
 				.catch(error => console.error('Error: ', error));
+			}
+			function authDelte() {
+				if(!confirm("정말 삭제하시겠습니까?")) return;
+
+				$.ajax({
+					type: "GET",
+					url: "/board/delete",
+					data: {idx: idx},
+					success: function(result) {
+						console.log(result);
+						if (result === "success") {
+							alert("게시글이 삭제되었습니다.");
+							location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword;
+						} else {
+							alert("게시글을 삭제할 수 없습니다.")
+						}
+					},
+					error: function() {
+						alert("서버 통신 오륙 발생했습니다.")
+					}
+				})
+
 			}
 			</script>
 		</div>
