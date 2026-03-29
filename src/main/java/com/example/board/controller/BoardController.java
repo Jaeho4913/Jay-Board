@@ -150,8 +150,12 @@ public class BoardController {
 		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 		if (loginMember != null) {
 			result.put("isLogin", true);
-			result.put("loginName", loginMember.getUserName());
-	} else {
+			String name = loginMember.getUserName();
+			if (name == null || name.trim().isEmpty()) {
+				name = loginMember.getUserId();
+				}
+				result.put("loginName", name);
+			} else {
 		result.put("isLogin", false);
 	}
 	return ResponseEntity.ok(result);

@@ -47,7 +47,7 @@ public class BoardDTO {
     public boolean getIsGuest() { return isGuest; }
     public void setIsGuest(boolean isGuest) { this.isGuest = isGuest; }
 
-    public String getUserId() {return getUserId();}
+    public String getUserId() {return user_id;}
     public void setUserId(String userId) {this.user_id= userId;}
 }
 	

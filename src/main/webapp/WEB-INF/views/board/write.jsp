@@ -84,7 +84,8 @@
 						if (result === "success") {
 							alert("게시글이 성공적으로 등록되었습니다!")
 							location.href = "/";
-					} else {
+
+						} else {
 						alert("게시글 등록에 실패했습니다.")
 					}
 				},

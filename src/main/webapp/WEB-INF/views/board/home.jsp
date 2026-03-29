@@ -74,6 +74,7 @@
 			data: {page: page, searchType: searchType, keyword: keyword},
 			dataType: 'json',
 			success: function(res){
+			console.log(res);
 				/* const url = `/board/list?page=${page}&searchType=${searchType}&keyword=${keyword}`;
 */
 				setAuth(res);
@@ -95,13 +96,13 @@
 		if (res.isLogin) {
 			html += `
 			<div style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
-				<span style="font-size: 1.1em;">안녕하세요 <strong>${res.loginName}</strong>님</span>
+				<span style="font-size: 1.1em;"> <strong>\${res.loginName}</strong>님, 환영합니다.</span>
 				<div>
 					<button onclick="location.href='/member/updatePw'"
 						style="cursor:pointer; background-color:#ffc107;border:none;padding:6px 12px;margin-right:5px;">
 						비밀번호 변경
 					</button>
-					<button onclick="location.href='${writeUrl}'"
+					<button onclick="location.href='\${writeUrl}'"
 						style="cursor:pointer;background-color:#28a745;color:white;border:none;padding:6px 12px;margin-right:5px;">
 						글쓰기
 					</button>
@@ -141,7 +142,7 @@
         	</button>
 
        	 	<button type="button"
-            	onclick="location.href='${writeUrl}'"
+            	onclick="location.href='\${writeUrl}'"
             	style="cursor:pointer; background-color:#28a745; color:white; border:none; padding:6px 12px;">
              	글쓰기
         	</button>
@@ -175,10 +176,10 @@
 			const detailUrl = '/board/view?idx=' + item.idx + '&page=' + boardData.searchDTO.page + '&searchType=' + boardData.searchDTO.searchType + '&keyword=' + boardData.searchDTO.keyword;
 			html += `
 			<tr>
-				<td>${item.idx}</td>
-				<td><a href="${detailUrl}">${item.title}</a></td>
-				<td>${item.writer}</td>
-				<td>${item.createdAt}</td>
+				<td>\${item.idx}</td>
+				<td><a href="\${detailUrl}">\${item.title}</a></td>
+				<td>\${item.writer}</td>
+				<td>\${item.createdAt}</td>
 			</tr>
 			`;
 		});
@@ -196,20 +197,20 @@
 
 		if (page > 1) {
 			html.push(`<a href="#" onclick="getBoardList(1); return false;" style="font-weight:bold;">[<<]</a>`);
-			html.push(`<a href="#" onclick="getBoardList(${page-1}); return false;" style="font-weight:bold;">[<]</a>`);
+			html.push(`<a href="#" onclick="getBoardList(\${page-1}); return false;" style="font-weight:bold;">[<]</a>`);
 		}
 
 		for (let i = startPage; i <= endPage; i++) {
 			if(page === i) {
-				html.push(`<span style="color:red; font-weight:bold; margin:0 5px;">[${i}]</span>`);
+				html.push(`<span style="color:red; font-weight:bold; margin:0 5px;">[\${i}]</span>`);
 			} else {
-				 html.push(`<a href="#" onclick="getBoardList(${i}); return false;" style="margin:0 5px;">[${i}]</a>`);
+				 html.push(`<a href="#" onclick="getBoardList(\${i}); return false;" style="margin:0 5px;">[\${i}]</a>`);
 			}
 		}
 
 		if (page < totalPage) {
-			html.push(`<a href="#" onclick="getBoardList(${page + 1}); return false;" style="font-weight:bold;">[>]</a>`);
-	        html.push(`<a href="#" onclick="getBoardList(${totalPage}); return false;" style="font-weight:bold;">[>>]</a>`);
+			html.push(`<a href="#" onclick="getBoardList(\${page + 1}); return false;" style="font-weight:bold;">[>]</a>`);
+	        html.push(`<a href="#" onclick="getBoardList(\${totalPage}); return false;" style="font-weight:bold;">[>>]</a>`);
 		}
 		pagination.html(html.join(''));
 	}
