@@ -1,4 +1,4 @@
-# Spring-Boot-AJAX-Board
+# Spring-Boot Board
 
 first spring boot web
 웹 게시판
