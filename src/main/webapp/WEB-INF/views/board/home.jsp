@@ -172,14 +172,21 @@
 
 		let html = '';
 
+		let totalCount = boardData.totalCount;
+		let currentPage = boardData.searchDTO.page;
+		let pageSize = boardData.searchDTO.size;
+
 		$.each(items, function(index, item){
 			const detailUrl = '/board/view?idx=' + item.idx + '&page=' + boardData.searchDTO.page + '&searchType=' + boardData.searchDTO.searchType + '&keyword=' + boardData.searchDTO.keyword;
+			let boardNumber = totalCount - ((currentPage -1) * pageSize) - index;
+			let boardTime = item.createdAt.replace('T', ' ');
+
 			html += `
 			<tr>
-				<td>\${item.idx}</td>
+				<td>\${boardNumber}</td>
 				<td><a href="\${detailUrl}">\${item.title}</a></td>
 				<td>\${item.writer}</td>
-				<td>\${item.createdAt}</td>
+				<td>\${boardTime}</td>
 			</tr>
 			`;
 		});
