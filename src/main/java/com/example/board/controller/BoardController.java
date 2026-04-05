@@ -125,16 +125,17 @@ public ResponseEntity<String> update(BoardDTO boardDTO, HttpSession session) {
 	MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 
 	boolean isAuth = false;
-	if (loginMember != null) {
-		String name = loginMember.getUserName();
-		if (name == null || name.isBlank()) {
-			name = loginMember.getUserId();
-		}
-		if (name.equals(originalBoard.getWriter())) {
+	if (originalBoard.getBoardPw() != null && !originalBoard.getBoardPw().trim().isEmpty()) {
+		if (boardDTO.getBoardPw() != null && boardDTO.getBoardPw().equals(originalBoard.getBoardPw())) {
 			isAuth = true;
 		}
-	} else if (boardDTO.getBoardPw() != null && boardDTO.getBoardPw().equals(originalBoard.getBoardPw())) {
-		isAuth = true;
+	}
+	else {
+		if(loginMember != null && originalBoard.getUserId() != null) {
+			if (loginMember.getUserId().equals(originalBoard.getUserId())) {
+				isAuth= true;
+			}
+		}
 	}
 
 	if (!isAuth ) {
@@ -148,25 +149,23 @@ public ResponseEntity<String> update(BoardDTO boardDTO, HttpSession session) {
 @GetMapping("/board/delete")
 public ResponseEntity<String> delete(@RequestParam("idx") Long idx,
 							 							 @RequestParam(value = "boardPw", required = false) String boardPw,
-							 							 HttpSession session)
-{
-	BoardDTO board = boardService.findById(idx);
-	if (board == null) return ResponseEntity.ok("fail");
+							 							 HttpSession session) {
+	BoardDTO originalBoard = boardService.findById(idx);
+	if (originalBoard == null) return ResponseEntity.ok("fail");
 	MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-
 	boolean isAuth = false;
-	if (loginMember != null) {
-		String name = loginMember.getUserName();
-		if (name == null || name.isBlank()) {
-			name = loginMember.getUserId();
-		}
-		if (name.equals(board.getWriter())) {
+	if (originalBoard.getBoardPw() != null && !originalBoard.getBoardPw().trim().isEmpty()) {
+		if (boardPw != null && boardPw.equals(originalBoard.getBoardPw())) {
 			isAuth = true;
 		}
-	} else if (boardPw != null && boardPw.equals(board.getBoardPw())) {
-		isAuth = true;
 	}
-
+	else {
+		if(loginMember != null && originalBoard.getUserId() != null) {
+			if (loginMember.getUserId().equals(originalBoard.getUserId())) {
+				isAuth= true;
+			}
+		}
+	}
 	if (!isAuth) {
 		return ResponseEntity.ok("fail");
 	}
