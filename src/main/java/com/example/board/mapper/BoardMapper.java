@@ -15,7 +15,8 @@ public interface BoardMapper {
     List<BoardDTO> findAll(@Param("offset") int offset,
     					   @Param("size") int size,
     					   @Param("keyword") String keyword,
-    					   @Param("searchType") String searchType);
+    					   @Param("searchType") String searchType,
+    					   @Param("sortOrder") String sortOrder);
 
     // 2. 글 저장
     void save(BoardDTO boardDTO);

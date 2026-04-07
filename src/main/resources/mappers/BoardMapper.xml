@@ -21,7 +21,7 @@
 				</choose>
 			</if>
 		</where>
-		ORDER BY idx DESC
+		ORDER BY idx ${sortOrder}
 		LIMIT #{size} OFFSET #{offset}
 	</select>
 

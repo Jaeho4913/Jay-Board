@@ -8,12 +8,14 @@ public class SearchDTO {
 	private Integer size;
 	private String keyword;
 	private String searchType;
+	private String sortOrder;
 	
 	public SearchDTO() {
 		this.page = 1;
 		this.size = 10;
 		this.keyword = "";
 		this.searchType = "";
+		this.sortOrder = "DESC";
 	}
 	public int getPage() {
 		if (page == null) return 1;
@@ -25,5 +27,9 @@ public class SearchDTO {
 	}
 	public int getOffset() {
 		return (getPage() - 1) * getSize();
+	}
+	public String  getSortOrder() {
+		if (sortOrder == null || sortOrder.trim().isEmpty()) return "DESC";
+		return sortOrder.toUpperCase();
 	}
 }

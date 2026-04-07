@@ -24,6 +24,10 @@
 		</select>
 		<input type="text" id="keyword" placeholder="검색어를 입력하세요"/>
 		<button type="button" id="btnSearch">검색</button>
+		<select id="sortOrder">
+			<option value="DESC">최신순</option>
+			<option value="ASC">과거순</option>
+		</select>
 	</div>
 
 	<table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
@@ -67,11 +71,12 @@
 	function getBoardList(page) {
 		let searchType = $('#searchType').val();
 		let keyword = $('#keyword').val();
+		let sortOrder = $('#sortOrder').val();
 
 		$.ajax({
 			type: 'GET',
 			url: '/api/boards',
-			data: {page: page, searchType: searchType, keyword: keyword},
+			data: {page: page, searchType: searchType, keyword: keyword, sortOrder: sortOrder},
 			dataType: 'json',
 			success: function(res){
 			console.log(res);
@@ -175,10 +180,16 @@
 		let totalCount = boardData.totalCount;
 		let currentPage = boardData.searchDTO.page;
 		let pageSize = boardData.searchDTO.size;
+		let sortOrder = boardData.searchDTO.sortOrder;
+		let boardNumber;
 
 		$.each(items, function(index, item){
 			const detailUrl = '/board/view?idx=' + item.idx + '&page=' + boardData.searchDTO.page + '&searchType=' + boardData.searchDTO.searchType + '&keyword=' + boardData.searchDTO.keyword;
-			let boardNumber = totalCount - ((currentPage -1) * pageSize) - index;
+			if (sortOrder === 'ASC') {
+			boardNumber = ((currentPage -1) * pageSize) + index + 1;
+			} else {
+				boardNumber = totalCount - ((currentPage -1) * pageSize) - index;
+			}
 			let boardTime = item.createdAt.replace('T', ' ');
 
 			html += `

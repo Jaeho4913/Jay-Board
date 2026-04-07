@@ -22,7 +22,8 @@ public class BoardServiceImpl implements BoardService {
 				searchDTO.getOffset(),
 				searchDTO.getSize(),
 				searchDTO.getKeyword(),
-				searchDTO.getSearchType()
+				searchDTO.getSearchType(),
+				searchDTO.getSortOrder()
 				);
 		int totalCount = boardMapper.count(searchDTO.getKeyword(), searchDTO.getSearchType());
 		
