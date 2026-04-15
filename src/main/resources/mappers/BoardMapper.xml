@@ -47,6 +47,12 @@
 		DELETE FROM tb_board WHERE idx = #{idx}
 	</delete>
 
+	<update id="updateViewCnt" parameterType="Long">
+		UPDATE tb_board
+		SET view_cnt = view_cnt + 1
+		WHERE idx = #{idx}
+	</update>
+	
 	<select id="count" resultType="int">
 		SELECT count(*) FROM tb_board
 		<where>

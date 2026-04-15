@@ -53,6 +53,7 @@ public class BoardController {
 	@ResponseBody
 	@GetMapping("/board/getDetail")
 	public ResponseEntity<BoardDTO> getBoardDetail(@RequestParam("idx") Long idx, HttpSession session) {
+		boardService.updateViewCnt(idx);
 		BoardDTO board = boardService.findById(idx);
 		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 
