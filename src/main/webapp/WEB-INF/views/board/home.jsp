@@ -1,4 +1,4 @@
-<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 
@@ -37,6 +37,7 @@
 				<th>제목</th>
 				<th>작성자</th>
 				<th>작성일</th>
+				<th>조회수</th>
 			</tr>
 		</thead>
 		<tbody id="boardList">
@@ -198,6 +199,7 @@
 				<td><a href="\${detailUrl}">\${item.title}</a></td>
 				<td>\${item.writer}</td>
 				<td>\${boardTime}</td>
+				<td>\${item.viewCnt}</td>
 			</tr>
 			`;
 		});
