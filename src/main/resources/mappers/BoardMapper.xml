@@ -21,7 +21,29 @@
 				</choose>
 			</if>
 		</where>
-		ORDER BY idx ${sortOrder}
+
+		<choose>
+			<when test= "sortType == 'latest'">
+				ORDER  BY created_at DESC, idx DESC
+			</when>
+
+			<when test = "sortType == 'oldest'">
+				ORDER BY created_at ASC, idx ASC
+			</when>
+
+			<when test = "sortType == 'viewDesc'">
+				ORDER BY view_cnt DESC, created_at DESC, idx DESC
+			</when>
+
+			<when test = "sortType == 'viewAsc'">
+				ORDER BY view_cnt ASC, created_at DESC, idx DESC
+			</when>
+
+			<otherwise>
+				ORDER BY created_at DESC, idx DESC
+			</otherwise>
+		</choose>
+
 		LIMIT #{size} OFFSET #{offset}
 	</select>
 
@@ -52,7 +74,7 @@
 		SET view_cnt = view_cnt + 1
 		WHERE idx = #{idx}
 	</update>
-	
+
 	<select id="count" resultType="int">
 		SELECT count(*) FROM tb_board
 		<where>

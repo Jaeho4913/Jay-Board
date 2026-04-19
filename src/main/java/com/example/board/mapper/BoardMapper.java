@@ -28,8 +28,4 @@ public interface BoardMapper {
     void delete(Long idx);
 
     void updateViewCnt(Long idx);
-
-    // 6. 전체 글 개수 (추가!)
-    int count(@Param("keyword") String keyword, @Param("searchType") String searchType);
-
 }
