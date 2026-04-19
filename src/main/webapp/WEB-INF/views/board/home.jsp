@@ -24,10 +24,6 @@ i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="U
 		</select>
 		<input type="text" id="keyword" placeholder="검색어를 입력하세요"/>
 		<button type="button" id="btnSearch">검색</button>
-		<select id="sortOrder">
-			<option value="DESC">최신순</option>
-			<option value="ASC">과거순</option>
-		</select>
 	</div>
 
 	<table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
@@ -36,8 +32,16 @@ i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="U
 				<th style="padding: 10px;">번호</th>
 				<th>제목</th>
 				<th>작성자</th>
-				<th>작성일</th>
-				<th>조회수</th>
+				<th>
+					작성일
+					<span style="cursor:pointer;" onclick="changeSort('latest')">▲</span>
+					<span style="cursor:pointer;" onclick="changeSort('oldest')">▼</span>
+				</th>
+				<th>
+					조회수
+					<span style="cursor:pointer;" onclick="changeSort('viewDesc')">▲</span>
+					<span style="cursor:pointer;" onclick="changeSort('viewAsc')">▼</span>
+				</th>
 			</tr>
 		</thead>
 		<tbody id="boardList">
@@ -50,12 +54,14 @@ i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="U
 </div>
 
 <script>
+let currentSortType = 'latest';
 	$(document).ready(function() {
 		let urlParams = new URLSearchParams(window.location.search);
 		let page=urlParams.get('page') || 1;
 
 		$('#searchType').val(urlParams.get('searchType') || '');
 		$('#keyword').val(urlParams.get('keyword') || '');
+		currentSortType = urlParams.get('sortType') || 'latest';
 
 		getBoardList(page);
 
@@ -69,20 +75,24 @@ i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="U
 		});
 	});
 
+
 	function getBoardList(page) {
 		let searchType = $('#searchType').val();
 		let keyword = $('#keyword').val();
-		let sortOrder = $('#sortOrder').val();
 
 		$.ajax({
 			type: 'GET',
 			url: '/api/boards',
-			data: {page: page, searchType: searchType, keyword: keyword, sortOrder: sortOrder},
+			data: {page: page, searchType: searchType, keyword: keyword, sortType: currentSortType},
 			dataType: 'json',
 			success: function(res){
-			console.log(res);
-				/* const url = `/board/list?page=${page}&searchType=${searchType}&keyword=${keyword}`;
-*/
+				const url= '/board/list?page=' + page
+				+ '&searchType=' + searchType
+				+ '&keyword=' + keyword
+				+ '&sortType=' + currentSortType;
+				history.replaceState(null, '', url);
+				console.log(res);
+
 				setAuth(res);
 				setBoardList(res.boardData);
 				setPaging(res.boardData);
@@ -93,10 +103,15 @@ i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="U
 		});
 	}
 
+	function changeSort(sortType) {
+		currentSortType = sortType;
+		getBoardList(1);
+	}
+
 	function setAuth(res){
 		let authArea = $('#authArea');
 		const boardData = res.boardData;
-		const writeUrl = '/write?page=' + boardData.searchDTO.page + '&searchType=' +boardData.searchDTO.searchType + '&keyword=' + boardData.searchDTO.keyword;
+		const writeUrl = '/write?page=' + boardData.searchDTO.page + '&searchType=' +boardData.searchDTO.searchType + '&keyword=' + boardData.searchDTO.keyword  + '&sortType=' + boardData.searchDTO.sortType;
 		let html = '';
 
 		if (res.isLogin) {
@@ -172,7 +187,7 @@ i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="U
 		const items = boardData.boardList;
 
 		if (!items || items.length === 0) {
-			tbody.append('<tr><td colspan="4">등록된 게시글이 없습니다.</td></tr>');
+			tbody.append('<tr><td colspan="5">등록된 게시글이 없습니다.</td></tr>');
 			return;
 		}
 
@@ -181,16 +196,11 @@ i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="U
 		let totalCount = boardData.totalCount;
 		let currentPage = boardData.searchDTO.page;
 		let pageSize = boardData.searchDTO.size;
-		let sortOrder = boardData.searchDTO.sortOrder;
-		let boardNumber;
+		let boardNumber = ((currentPage - 1) * pageSize) + index + 1;
 
 		$.each(items, function(index, item){
-			const detailUrl = '/board/view?idx=' + item.idx + '&page=' + boardData.searchDTO.page + '&searchType=' + boardData.searchDTO.searchType + '&keyword=' + boardData.searchDTO.keyword;
-			if (sortOrder === 'ASC') {
-			boardNumber = ((currentPage -1) * pageSize) + index + 1;
-			} else {
-				boardNumber = totalCount - ((currentPage -1) * pageSize) - index;
-			}
+			const detailUrl = '/board/view?idx=' + item.idx + '&page=' + boardData.searchDTO.page + '&searchType=' + boardData.searchDTO.searchType + '&keyword=' + boardData.searchDTO.keyword  + '&sortType=' + boardData.searchDTO.sortType;
+
 			let boardTime = item.createdAt.replace('T', ' ');
 
 			html += `

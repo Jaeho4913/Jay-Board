@@ -5,22 +5,19 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param; // 👈 ★ 이거 중요! (임포트 필수)
 
 import com.example.board.dto.BoardDTO;
+import com.example.board.dto.SearchDTO;
 
 import java.util.List;
 
 @Mapper
 public interface BoardMapper {
-    
-    // 1. 목록 보기 (파라미터 2개 추가된 버전으로 교체!)
-    List<BoardDTO> findAll(@Param("offset") int offset,
-    					   @Param("size") int size,
-    					   @Param("keyword") String keyword,
-    					   @Param("searchType") String searchType,
-    					   @Param("sortOrder") String sortOrder);
 
+    // 1. 목록 보기 (파라미터 2개 추가된 버전으로 교체!)
+    List<BoardDTO> findAll(SearchDTO searchDTO);
+    int count(SearchDTO searchDTO);
     // 2. 글 저장
     void save(BoardDTO boardDTO);
-    
+
     // 3. 상세 보기
     BoardDTO findById(Long idx);
 
@@ -29,10 +26,10 @@ public interface BoardMapper {
 
     // 5. 삭제
     void delete(Long idx);
-    
+
     void updateViewCnt(Long idx);
 
     // 6. 전체 글 개수 (추가!)
     int count(@Param("keyword") String keyword, @Param("searchType") String searchType);
-    
+
 }

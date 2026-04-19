@@ -15,21 +15,34 @@ public class BoardServiceImpl implements BoardService {
 
 	@Autowired
 	private BoardMapper boardMapper;
-	
+
 	@Override
 	public PageResponseDTO findAll(SearchDTO searchDTO) {
-		List<BoardDTO> list = boardMapper.findAll(
-				searchDTO.getOffset(),
-				searchDTO.getSize(),
-				searchDTO.getKeyword(),
-				searchDTO.getSearchType(),
-				searchDTO.getSortOrder()
-				);
-		int totalCount = boardMapper.count(searchDTO.getKeyword(), searchDTO.getSearchType());
-		
+		validateSortType(searchDTO);
+
+		List<BoardDTO> list = boardMapper.findAll(searchDTO);
+		int totalCount = boardMapper.count(searchDTO);
+
 		return new PageResponseDTO(searchDTO, totalCount, list);
 	}
-	
+	private void validateSortType(SearchDTO searchDTO) {
+		String sortType = searchDTO.getSortType();
+
+		if (sortType == null || sortType.trim().isEmpty()) {
+			searchDTO.setSortType("latest");
+			return;
+		}
+		switch(sortType) {
+		case "latest":
+		case "oldest":
+		case "viewDesc":
+		case "viewAsc":
+			break;
+		default:
+			searchDTO.setSortType("latest");
+		}
+	}
+
 	@Override
 	public void save(BoardDTO boardDTO) {
 		boardMapper.save(boardDTO);

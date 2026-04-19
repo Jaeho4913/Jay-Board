@@ -9,13 +9,15 @@ public class SearchDTO {
 	private String keyword;
 	private String searchType;
 	private String sortOrder;
-	
+	private String sortType;
+
 	public SearchDTO() {
 		this.page = 1;
 		this.size = 10;
 		this.keyword = "";
 		this.searchType = "";
 		this.sortOrder = "DESC";
+		this.sortType = "latest";
 	}
 	public int getPage() {
 		if (page == null) return 1;
@@ -29,7 +31,13 @@ public class SearchDTO {
 		return (getPage() - 1) * getSize();
 	}
 	public String  getSortOrder() {
-		if (sortOrder == null || sortOrder.trim().isEmpty()) return "DESC";
+		if (sortOrder == null || sortOrder.trim().isEmpty())
+			return "DESC";
 		return sortOrder.toUpperCase();
+	}
+	public String getSortType() {
+		if(sortType == null || sortType.trim().isEmpty())
+			return "latest";
+		return sortType;
 	}
 }

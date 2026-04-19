@@ -53,10 +53,11 @@
 			const page = urlParams.get('page') || 1;
 			const searchType = urlParams.get('searchType') || '';
 			const keyword = urlParams.get('keyword') || '';
+			const sortType = urlParams.get('sortType') || 'latest';
 
 			function getDetail() {
 			$("#btnList").on("click", function(){
-				location.href = '/?page=' +page + '&searchType=' + searchType + '&keyword=' + keyword;
+				location.href = '/?page=' +page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
 				})	;
 			$.ajax ({
 				type: "GET",
@@ -116,14 +117,14 @@
 				.then(result => {
 					if (result === "success") {
 						alert("게시글이 삭제되었습니다.");
-						location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword;
+						location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
 					} else {
 						alert("비밀번호가 일치하지 않습니다.");
 					}
 				})
 				.catch(error => console.error('Error: ', error));
 			}
-			function authDelte() {
+			function authDelete() {
 				if(!confirm("정말 삭제하시겠습니까?")) return;
 
 				$.ajax({
@@ -134,7 +135,7 @@
 						console.log(result);
 						if (result === "success") {
 							alert("게시글이 삭제되었습니다.");
-							location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword;
+							location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
 						} else {
 							alert("게시글을 삭제할 수 없습니다.")
 						}
