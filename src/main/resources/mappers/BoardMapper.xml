@@ -47,6 +47,28 @@
 		LIMIT #{size} OFFSET #{offset}
 	</select>
 
+	<select id="countLike" resultType="int">
+		SELECT COUNT(*) FROM tb_board_like
+			WHERE board_idx = #{idx}
+	</select>
+
+	<select id="existsLike" resultType="int">
+		SELECT COUNT(*) FROM tb_board_like
+			WHERE board_idx = #{idx}
+				AND user_id = #{userId}
+	</select>
+	
+	<select id="insertLike">
+		INSERT INTO tb_board_like  (board_idx, user_id)
+		VALUES (#{idx}, #{userId})
+	</select>
+	
+	<select id="deleteLike">
+		DELETE	FROM tb_board_like 
+			WHERE board_idx = #{idx}
+				AND user_id = #{userId}
+	</select>
+
 	<insert id="save" parameterType="com.example.board.dto.BoardDTO">
 			INSERT INTO tb_board (title, content, writer, user_id,  board_pw, view_cnt, created_at, updated_at)
 			Values (#{title}, #{content}, #{writer}, #{userId}, #{boardPw}, 0, NOW(), NOW())

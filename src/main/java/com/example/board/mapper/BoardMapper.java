@@ -15,6 +15,11 @@ public interface BoardMapper {
     // 1. 목록 보기 (파라미터 2개 추가된 버전으로 교체!)
     List<BoardDTO> findAll(SearchDTO searchDTO);
     int count(SearchDTO searchDTO);
+    int countLike(@Param("idx") Long idx);
+    int existsLike(@Param("idx") Long idx, @Param("userId") String userId);
+    int insertLike(@Param("idx") Long idx, @Param("userId") String userId);
+    int deleteLike(@Param("idx") Long idx, @Param("userId") String userId);
+    
     // 2. 글 저장
     void save(BoardDTO boardDTO);
 
@@ -28,4 +33,7 @@ public interface BoardMapper {
     void delete(Long idx);
 
     void updateViewCnt(Long idx);
+    
+    
+    
 }

@@ -1,14 +1,20 @@
 package com.example.board.service;
 
+import java.net.ResponseCache;
 import java.util.List;
+
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.board.dto.BoardDTO;
+import com.example.board.dto.LikeResponseDTO;
 import com.example.board.dto.PageResponseDTO;
 import com.example.board.dto.SearchDTO;
+import com.example.board.dto.LikeResponseDTO;
 import com.example.board.mapper.BoardMapper;
+import com.sun.net.httpserver.Authenticator.Success;
+
 
 @Service
 public class BoardServiceImpl implements BoardService {
@@ -41,6 +47,27 @@ public class BoardServiceImpl implements BoardService {
 		default:
 			searchDTO.setSortType("latest");
 		}
+	}
+
+	@Override
+	public LikeResponseDTO btnLike(Long idx, String userId) {
+		LikeResponseDTO response = new LikeResponseDTO();
+
+		int exists = boardMapper.existsLike(idx, userId);
+
+		if (exists > 0) {
+			boardMapper.deleteLike(idx, userId);
+			response.setLikeCheck(false);
+		} else {
+			boardMapper.insertLike(idx, userId);
+			response.setLikeCheck(true);
+		}
+		int likeCnt = boardMapper.countLike(idx);
+
+		response.setStatus("success");
+		response.setLikeCnt(likeCnt);
+
+		return response;
 	}
 
 	@Override

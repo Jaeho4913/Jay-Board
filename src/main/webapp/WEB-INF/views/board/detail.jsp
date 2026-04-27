@@ -35,6 +35,13 @@
 				<td id="v_viewCnt">로딩중...</td>
 			</tr>
 			<tr>
+				<th>공감</th>
+				<td>
+					<button type="button" id="btnLike">♡</button>
+					<span id="v_likeCnt">0</span>
+				</td>
+			</tr>
+			<tr>
 				<th>내용</th>
 				<td id="v_content" style="height: 200px; vertical-align: top;">로딩중...</td>
 			</tr>
@@ -46,6 +53,38 @@
 			<script>
 			$(document).ready(function () {
 				getDetail();
+
+				$("#btnList").on("click", function(){
+					location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
+				});
+
+				$("#btnLike").on("click", function() {
+					$.ajax({
+						type: "POST",
+						url: "/board/like",
+						data: {idx: idx},
+						dataType: "json",
+						success: function(res) {
+							if (res.status === "loginRequired") {
+								alert("로그인 후 가능합니다.");
+								return;
+							}
+
+							if (res.status === "success") {
+								$("#v_likeCnt").text(res.likeCnt);
+
+								if (res.likeCheck === true) {
+									$("#btnLike").text("♥");
+								} else {
+									$("#btnLike").text("♡");
+								}
+							}
+						},
+						error: function() {
+							alert("오류가 발생했습니다.");
+						}
+					});
+				});
 			});
 
 			const urlParams = new URLSearchParams(window.location.search);
@@ -56,33 +95,42 @@
 			const sortType = urlParams.get('sortType') || 'latest';
 
 			function getDetail() {
-			$("#btnList").on("click", function(){
-				location.href = '/?page=' +page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
-				})	;
-			$.ajax ({
-				type: "GET",
-				url: "/board/getDetail",
-				data: {idx: idx},
-				dataType: "json",
-				success: function(response) {
-				$("#v_idx").text(response.idx);
-				$("#v_createdAt").text(response.createdAt);
-				$("#v_writer").text(response.writer);
-				$("#v_viewCnt").text(response.viewCnt);
-				$("#v_content").text(response.content);
+				$.ajax({
+					type: "GET",
+					url: "/board/getDetail",
+					data: { idx: idx },
+					dataType: "json",
+					success: function(response) {
+						$("#v_idx").text(response.idx);
+						$("#v_createdAt").text(response.createdAt);
+						$("#v_writer").text(response.writer);
+						$("#v_viewCnt").text(response.viewCnt);
+						$("#v_likeCnt").text(response.likeCnt);
+						$("#v_content").text(response.content);
 
-				if (response.isAuth === true) {
-					let btnHtml = '<button onclick="location.href=\'/board/update?idx=' + idx +'\'">수정</button>' +
-										'<button onclick= "authDelete()">삭제</button>';
-					$("#authBtnArea").html(btnHtml);
-				} else if (response.isGuest === true) {
-					let btnHtml = '<button onclick="guestUpdate()">수정</button>' +
-										'<button onclick="guestDelete()">삭제</button>';
-					$("#authBtnArea").html(btnHtml);
-				}
-				}
-			})	;
+						if (response.likeCheck === true) {
+							$("#btnLike").text("♥");
+						} else {
+							$("#btnLike").text("♡");
+						}
+
+						if (response.isAuth === true) {
+							let btnHtml = '<button onclick="location.href=\'/board/update?idx=' + idx +'\'">수정</button>' +
+												'<button onclick= "authDelete()">삭제</button>';
+							$("#authBtnArea").html(btnHtml);
+						} else if (response.isGuest === true) {
+							let btnHtml = '<button onclick="guestUpdate()">수정</button>' +
+												'<button onclick="guestDelete()">삭제</button>';
+							$("#authBtnArea").html(btnHtml);
+						}
+					},
+					error: function() {
+						alert("상세 정보를 불러오지 못했습니다.");
+					}
+				});
 			}
+
+
 			function guestUpdate() {
 				var pw = prompt("글 작성 시 입력한 비밀번호를 입력하세요 : ");
 				if (!pw) return;
