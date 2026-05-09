@@ -69,7 +69,16 @@ public class BoardServiceImpl implements BoardService {
 
 		return response;
 	}
-
+	
+	@Override 
+	public int countLike(Long idx) {
+		return boardMapper.countLike(idx);
+	}
+	@Override
+	public int existsLike(Long idx, String userId) {
+		return boardMapper.existsLike(idx, userId);
+	}
+	
 	@Override
 	public void save(BoardDTO boardDTO) {
 		boardMapper.save(boardDTO);

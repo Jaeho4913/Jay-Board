@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.InitBinder;
 import jakarta.servlet.http.HttpSession;
+import sun.jvm.hotspot.oops.java_lang_Class;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -37,6 +39,10 @@ public class BoardController {
     public String home() {
         return "board/home";
     }
+    @GetMapping("/board/list")
+    public String boardList() {
+    	return "board/home";
+    }
     @GetMapping("/write")
     public String writeForm(@ModelAttribute SearchDTO searchDTO, Model model) {
         model.addAttribute("searchDTO", searchDTO);
@@ -58,12 +64,18 @@ public class BoardController {
         BoardDTO board = boardService.findById(idx);
         MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 
+        if(loginMember != null) {
+        	int exists = boardService.existsLike(idx, loginMember.getUserId());
+        	board.setLikeCheck(exists > 0);
+        } else {
+        	board.setLikeCheck(false);
+        }
         if (board.getBoardPw() != null && !board.getBoardPw().isEmpty()) {
-            board.setIsGuest(true);
+            board.setGuest(true);
         }
         else {
             if(loginMember != null && loginMember.getUserId().equals(board.getUserId())) {
-                board.setIsAuth(true);
+                board.setAuth(true);
             }
         }
         return ResponseEntity.ok(board);

@@ -193,12 +193,12 @@ let currentSortType = 'latest';
 
 		let html = '';
 
-		let totalCount = boardData.totalCount;
+
 		let currentPage = boardData.searchDTO.page;
 		let pageSize = boardData.searchDTO.size;
-		let boardNumber = ((currentPage - 1) * pageSize) + index + 1;
 
 		$.each(items, function(index, item){
+			let boardNumber = ((currentPage - 1) * pageSize) + index + 1;
 			const detailUrl = '/board/view?idx=' + item.idx + '&page=' + boardData.searchDTO.page + '&searchType=' + boardData.searchDTO.searchType + '&keyword=' + boardData.searchDTO.keyword  + '&sortType=' + boardData.searchDTO.sortType;
 
 			let boardTime = item.createdAt.replace('T', ' ');

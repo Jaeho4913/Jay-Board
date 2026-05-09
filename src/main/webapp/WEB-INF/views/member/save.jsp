@@ -32,8 +32,7 @@
 
 			<p>
 				<label>이메일 :</label>
-				<input type="text" name="email" id="email" maxlength="100" data-check-result="fail"  placeholder="이메일을 입력하세요">
-				<button type="button" onclick="checkEmail()">중복검사</button>
+				<input type="text" name="email" id="email" maxlength="100"  placeholder="이메일을 입력하세요">
 			</p>
 
 			<button type="submit">가입하기</button>
@@ -53,76 +52,43 @@
 				$("#userId").on("input", function() {
 					$(this).attr("data-check-result", "fail");
 				});
-				$("#email").on("input", function() {
-					$(this).attr("data-check-result", "fail");
-				});
 			});
 			function checkId() {
-				 var userId = $("#userId").val().trim();
-				if (userId == "" ){
+
+				var userId = $("#userId").val().trim();
+
+				if (userId == "") {
 					alert("아이디를 입력해주세요");
 					$("#userId").focus();
 					return;
-				 }
-				 var idReg = /^[a-zA-Z0-9]{8,40}$/;
+				}
 
-				 if  (!idReg.test(userId)) {
-					alert("아이디는 한글 사용이 불가합니다.");
+				var idReg = /^[a-zA-Z0-9]{8,40}$/;
+
+				if (!idReg.test(userId)) {
+					alert("아이디는 영문/숫자만 가능하며 8~40자여야 합니다.");
 					$("#userId").focus();
 					return;
-				 }
-				 $.ajax({
-						type: "get",
-						url: "/member/checkId/" + userId,
-						dataType: "text",
-						cache: false,
-						success: function(result){
-							if (result != "existID") {
-								alert("사용 가능한 아이디입니다.");
-								$("#userId").attr("data-check-result", "success");
-							} else {
-								alert("이미 사용 중인 아이디입니다.");
-								$("#userId").attr("data-check-result", "fail");
-								$("#userId").val("").focus();
-							}
-						}
-				 });
-			}
-
-			function checkEmail() {
-				var email = $("#email").val().trim();
-				var emailReg = /^[a-zA-Z-0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-				if (email == "") {
-					alert("이메일을 입력해주세요.");
-					$("#email").focus();
-					return;
 				}
 
-				if  (email.length > 100) {
-					alert("이메일은 100자 이내여야 합니다.")
-					$("#email").focus();
-					return;
-				}
-
-				if (!emailReg.test(email)) {
-					alert("올바른 이메일 형식이 아닙니다.(한글 입력은 불가합니다.)");
-					$("#email").focus();
-					return;
-				}
-
-				$.ajax ({
+				$.ajax({
 					type: "get",
-					url: "/member/checkEmail/" + email,
+					url: "/member/checkId/" + encodeURIComponent(userId),
 					dataType: "text",
 					cache: false,
-					success: function(result){
-						if (result != "existEmail") {
-							alert("사용 가능한 이메일입니다.");
-							$("#email").attr("data-check-result", "success");
+
+					success: function(result) {
+
+						if (result != "existID") {
+							alert("사용 가능한 아이디입니다.");
+							$("#userId").attr("data-check-result", "success");
+
 						} else {
-							alert("이미 사용중인 이메일입니다.");
-							$("#email").attr("data-check-result", "fail");
-							$("#email").val("").focus();
+							alert("이미 사용 중인 아이디입니다.");
+
+							$("#userId").attr("data-check-result", "fail");
+
+							$("#userId").val("").focus();
 						}
 					}
 				});
@@ -155,9 +121,17 @@
 					$("#userName").val("").focus();
 					return false;
 				}
+				var email = $("#email").val().trim();
+				var emailReg = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-				if ($("#email").attr("data-check-result") == "fail") {
-					alert("이메일 중복 검사를 해주세요.");
+				if (email == "") {
+					alert("이메일을 입력해주세요.");
+					$("#email").focus();
+					return false;
+				}
+
+				if (!emailReg.test(email)) {
+					alert("올바른 이메일 형식이 아닙니다.");
 					$("#email").focus();
 					return false;
 				}
