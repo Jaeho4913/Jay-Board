@@ -1,6 +1,7 @@
 package com.example.board.controller; // 패키지명
 
 import org.apache.jasper.tagplugins.jstl.core.If;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.InitBinder;
 import jakarta.servlet.http.HttpSession;
-import sun.jvm.hotspot.oops.java_lang_Class;
+
 
 import java.util.Map;
 import java.util.HashMap;
@@ -64,7 +65,17 @@ public class BoardController {
         BoardDTO board = boardService.findById(idx);
         MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 
+        int likeCnt = boardService.countLike(idx);
+        board.setLikeCnt(likeCnt);
+
         if(loginMember != null) {
+        	int exists = boardService.existsLike(idx, loginMember.getUserId());
+        	board.setLikeCheck(exists > 0);
+        } else {
+        	board.setLikeCheck(false);
+        }
+
+        if (loginMember != null) {
         	int exists = boardService.existsLike(idx, loginMember.getUserId());
         	board.setLikeCheck(exists > 0);
         } else {
