@@ -1,5 +1,5 @@
 # Spring-Boot Board
-   **사이트 주소: http://13.125.170.236/**
+   **사이트 주소: http://110.165.19.54/**
 
 first spring boot web
 웹 게시판
