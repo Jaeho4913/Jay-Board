@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Param; // 👈 ★ 이거 중요! (임포트 필수)
 
 import com.example.board.dto.BoardDTO;
+import com.example.board.dto.LikeUserDTO;
 import com.example.board.dto.SearchDTO;
 import com.example.board.dto.MemberDTO;
 
@@ -21,9 +22,9 @@ public interface BoardMapper {
     int existsLike(@Param("idx") Long idx, @Param("userId") String userId);
     int insertLike(@Param("idx") Long idx, @Param("userId") String userId);
     int deleteLike(@Param("idx") Long idx, @Param("userId") String userId);
-    
-    List<MemberDTO> findLikeUsers(@Param("idx") Long idx);
-    
+
+    List<LikeUserDTO> findLikeUsers(Long idx);
+
     // 2. 글 저장
     void save(BoardDTO boardDTO);
 
@@ -37,7 +38,7 @@ public interface BoardMapper {
     void delete(Long idx);
 
     void updateViewCnt(Long idx);
-    
-    
-    
+
+
+
 }

@@ -1,8 +1,10 @@
 package com.example.board.service;
 
+import java.util.List;
+
 import com.example.board.dto.BoardDTO;
 import com.example.board.dto.LikeResponseDTO;
-
+import com.example.board.dto.LikeUserDTO;
 import com.example.board.dto.PageResponseDTO;
 import com.example.board.dto.SearchDTO;
 
@@ -18,4 +20,5 @@ public interface BoardService {
 	LikeResponseDTO btnLike(Long idx, String userId);
 	int countLike(Long idx);
 	int existsLike(Long idx, String userId);
+	List<LikeUserDTO> findLikeUsers(Long idx);
 }

@@ -1,6 +1,7 @@
 package com.example.board.service;
 
 import java.net.ResponseCache;
+
 import java.util.List;
 
 
@@ -11,6 +12,7 @@ import com.example.board.dto.BoardDTO;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.dto.PageResponseDTO;
 import com.example.board.dto.SearchDTO;
+import com.example.board.dto.*;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.mapper.BoardMapper;
 import com.sun.net.httpserver.Authenticator.Success;
@@ -77,6 +79,10 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public int existsLike(Long idx, String userId) {
 		return boardMapper.existsLike(idx, userId);
+	}
+	@Override
+	public List<LikeUserDTO> findLikeUsers(Long idx) {
+		return boardMapper.findLikeUsers(idx);
 	}
 	
 	@Override

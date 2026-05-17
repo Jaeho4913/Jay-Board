@@ -38,7 +38,8 @@
 				<th>공감</th>
 				<td>
 					<button type="button" id="btnLike">♡</button>
-					<span id="v_likeCnt">0</span>
+					<span id="v_likeCnt" style="cursor:pointer; text-decoration:underline;">0</span>
+					<div id="likeUsersList" style="display:none; margin-top:10px;"></div>
 				</td>
 			</tr>
 			<tr>
@@ -72,6 +73,8 @@
 
 							if (res.status === "success") {
 								$("#v_likeCnt").text(res.likeCnt);
+								$("#btnLike").text(res.likeCheck === true ? "♥" : "♡" );
+								$("#likeUserList").hide().empty();
 
 								if (res.likeCheck === true) {
 									$("#btnLike").text("♥");
@@ -82,6 +85,32 @@
 						},
 						error: function() {
 							alert("오류가 발생했습니다.");
+						}
+					});
+				});
+				$("#v_likeCnt").on("click", function(){
+					$.ajax({
+						type: "GET",
+						url: "/board/likeUsers",
+						data: {idx: idx},
+						dataType: "json",
+						success: function(users){
+							let html = "";
+
+							if (!users || users.length ===0) {
+								html = "<div>공감한 사용자가 없습니다.</div>";
+							} else {
+								users.forEach(function(user) {
+									html += "<div>"
+										+ user.userName
+										+ " (" + user.userId + ")"
+										+"</div>";
+								});
+							}
+							$("#likeUserList").html(html).toggle();
+						},
+						error: function() {
+							alert("공감 목록을 불러오지 못했습니다.");
 						}
 					});
 				});

@@ -1,4 +1,4 @@
-i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 
@@ -42,10 +42,11 @@ i8<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="U
 					<span style="cursor:pointer;" onclick="changeSort('viewDesc')">▲</span>
 					<span style="cursor:pointer;" onclick="changeSort('viewAsc')">▼</span>
 				</th>
+				<th>공감</th>
 			</tr>
 		</thead>
 		<tbody id="boardList">
-			<tr><td colspan="4">로딩중입니다.</td></tr>
+			<tr><td colspan="6">로딩중입니다.</td></tr>
 		</tbody>
 	</table>
 
@@ -187,7 +188,7 @@ let currentSortType = 'latest';
 		const items = boardData.boardList;
 
 		if (!items || items.length === 0) {
-			tbody.append('<tr><td colspan="5">등록된 게시글이 없습니다.</td></tr>');
+			tbody.append('<tr><td colspan="6">등록된 게시글이 없습니다.</td></tr>');
 			return;
 		}
 
@@ -210,6 +211,7 @@ let currentSortType = 'latest';
 				<td>\${item.writer}</td>
 				<td>\${boardTime}</td>
 				<td>\${item.viewCnt}</td>
+				<td>\${item.likeCnt}</td>
 			</tr>
 			`;
 		});

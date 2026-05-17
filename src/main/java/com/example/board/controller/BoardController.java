@@ -19,9 +19,11 @@ import jakarta.servlet.http.HttpSession;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 import com.example.board.dto.BoardDTO;
 import com.example.board.dto.LikeResponseDTO;
+import com.example.board.dto.LikeUserDTO;
 import com.example.board.dto.PageResponseDTO;
 import com.example.board.dto.SearchDTO;
 import com.example.board.service.BoardService;
@@ -144,6 +146,12 @@ public ResponseEntity<LikeResponseDTO> btnLike(@RequestParam("idx") Long idx, Ht
     }
     LikeResponseDTO result = boardService.btnLike(idx, loginMember.getUserId());
     return ResponseEntity.ok(result);
+}
+
+@ResponseBody
+@GetMapping("board/likeUsers")
+public List<LikeUserDTO> likeUsers(@RequestParam("idx") Long idx) {
+	return boardService.findLikeUsers(idx);
 }
 
 @ResponseBody

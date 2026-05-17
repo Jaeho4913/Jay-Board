@@ -5,18 +5,26 @@
 <mapper namespace="com.example.board.mapper.BoardMapper">
 
 	<select id="findAll" resultType="com.example.board.dto.BoardDTO">
-		SELECT * FROM tb_board
+		SELECT
+			b.*,
+			COALESCE(l.like_cnt, 0) AS likecnt
+			FROM tb_board b
+			LEFT JOIN (
+				SELECT board_idx, COUNT(*) AS like_cnt
+				FROM tb_board_like
+				GROUP BY board_idx
+				) l ON b.idx = l.board_idx
 		<where>
 			<if test="keyword != null and keyword != ''">
 				<choose>
 					<when test="searchType == 'title'">
-						AND title LIKE CONCAT('%', #{keyword}, '%')
+						AND b.title LIKE CONCAT('%', #{keyword}, '%')
 					</when>
 					<when test="searchType == 'content'">
-						AND content LIKE CONCAT('%', #{keyword}, '%')
+						AND b.content LIKE CONCAT('%', #{keyword}, '%')
 					</when>
 					<when test="searchType == 'writer'">
-						AND writer LIKE CONCAT('%', #{keyword}, '%')
+						AND b.writer LIKE CONCAT('%', #{keyword}, '%')
 					</when>
 				</choose>
 			</if>
@@ -24,23 +32,23 @@
 
 		<choose>
 			<when test= "sortType == 'latest'">
-				ORDER  BY created_at DESC, idx DESC
+				ORDER  BY b.created_at DESC, b.idx DESC
 			</when>
 
 			<when test = "sortType == 'oldest'">
-				ORDER BY created_at ASC, idx ASC
+				ORDER BY b.created_at ASC, idx ASC
 			</when>
 
 			<when test = "sortType == 'viewDesc'">
-				ORDER BY view_cnt DESC, created_at DESC, idx DESC
+				ORDER BY b.view_cnt DESC, b.created_at DESC, b.idx DESC
 			</when>
 
 			<when test = "sortType == 'viewAsc'">
-				ORDER BY view_cnt ASC, created_at DESC, idx DESC
+				ORDER BY b.view_cnt ASC, b.created_at DESC, b.idx DESC
 			</when>
 
 			<otherwise>
-				ORDER BY created_at DESC, idx DESC
+				ORDER BY b.created_at DESC, b.idx DESC
 			</otherwise>
 		</choose>
 
@@ -69,6 +77,16 @@
 				AND user_id = #{userId}
 	</delete>
 
+	<select id="findLikeUsers" resultType="com.example.board.dto.LikeUserDTO">
+		SELECT
+			m.user_id AS userId,
+			m.user_name AS userName
+			FROM tb_board_like bl
+			INNER JOIN members m
+				ON bl.user_id = m.user_id
+			WHERE bl.board_idx = #{idx}
+			ORDER BY bl.created_at DESC
+	</select>
 
 	<insert id="save" parameterType="com.example.board.dto.BoardDTO">
 			INSERT INTO tb_board (title, content, writer, user_id,  board_pw, view_cnt, created_at, updated_at)
