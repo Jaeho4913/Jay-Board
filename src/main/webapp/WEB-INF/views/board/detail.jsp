@@ -39,7 +39,6 @@
 				<td>
 					<button type="button" id="btnLike">♡</button>
 					<span id="v_likeCnt" style="cursor:pointer; text-decoration:underline;">0</span>
-					<div id="likeUsersList" style="display:none; margin-top:10px;"></div>
 				</td>
 			</tr>
 			<tr>
@@ -48,6 +47,22 @@
 			</tr>
 		</table>
 
+		<div id= "likeModal" style="display:none; position:fixed; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999;">
+			<div style="
+				background:white;
+				width:350px;
+				max-width: 90%;
+				margin:150px auto;
+				padding:20px;
+			    border-radius:10px;
+			 ">
+				<h3>좋아요 한 사람</h3>
+				<div id="likeModalBody"></div>
+				<br>
+				<button type="button" id="btnCloseLikeModal">닫기</button>
+			</div>
+		</div>
+
 		<div class="btn-area">
 			<button id="btnList">목록으로</button>
 			<span id="authBtnArea"></span>
@@ -55,6 +70,9 @@
 			$(document).ready(function () {
 				getDetail();
 
+				$("#btnCloseLikeModal").on("click", function() {
+					$("#likeModal").hide();
+				})
 				$("#btnList").on("click", function(){
 					location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
 				});
@@ -74,7 +92,8 @@
 							if (res.status === "success") {
 								$("#v_likeCnt").text(res.likeCnt);
 								$("#btnLike").text(res.likeCheck === true ? "♥" : "♡" );
-								$("#likeUserList").hide().empty();
+								$("#likeModalBody").empty();
+								$("#likeModal").hide();
 
 								if (res.likeCheck === true) {
 									$("#btnLike").text("♥");
@@ -107,7 +126,8 @@
 										+"</div>";
 								});
 							}
-							$("#likeUserList").html(html).toggle();
+							$("#likeModalBody").html(html);
+							$("#likeModal").show();
 						},
 						error: function() {
 							alert("공감 목록을 불러오지 못했습니다.");
