@@ -7,7 +7,7 @@
 	<select id="findAll" resultType="com.example.board.dto.BoardDTO">
 		SELECT
 			b.*,
-			COALESCE(l.like_cnt, 0) AS likecnt
+			COALESCE(l.like_cnt, 0) AS likeCnt
 			FROM tb_board b
 			LEFT JOIN (
 				SELECT board_idx, COUNT(*) AS like_cnt
@@ -45,6 +45,14 @@
 
 			<when test = "sortType == 'viewAsc'">
 				ORDER BY b.view_cnt ASC, b.created_at DESC, b.idx DESC
+			</when>
+
+			<when test = "sortType == 'likeDesc'">
+				ORDER BY COALESCE(l.like_cnt, 0) DESC, b.created_at DESC, b.idx DESC
+			</when>
+
+			<when test = "sortType == 'likeAsc'">
+				ORDER BY COALESCE(l.like_cnt, 0) ASC, b.created_at DESC, b.idx DESC
 			</when>
 
 			<otherwise>

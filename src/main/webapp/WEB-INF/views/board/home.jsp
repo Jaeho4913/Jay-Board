@@ -42,7 +42,11 @@
 					<span style="cursor:pointer;" onclick="changeSort('viewDesc')">▲</span>
 					<span style="cursor:pointer;" onclick="changeSort('viewAsc')">▼</span>
 				</th>
-				<th>공감</th>
+				<th>
+					공감
+					<span style="cursor:pointer;" onclick="changeSort('likeDesc')">▲</span>
+					<span style="cursor:pointer;" onclick="changeSort('likeAsc')">▼</span>
+				</th>
 			</tr>
 		</thead>
 		<tbody id="boardList">
@@ -60,7 +64,7 @@ let currentSortType = 'latest';
 		let urlParams = new URLSearchParams(window.location.search);
 		let page=urlParams.get('page') || 1;
 
-		$('#searchType').val(urlParams.get('searchType') || '');
+		$('#searchType').val(urlParams.get('searchType') || 'title');
 		$('#keyword').val(urlParams.get('keyword') || '');
 		currentSortType = urlParams.get('sortType') || 'latest';
 

@@ -45,6 +45,8 @@ public class BoardServiceImpl implements BoardService {
 		case "oldest":
 		case "viewDesc":
 		case "viewAsc":
+		case "likeDesc":
+		case "likeAsc":
 			break;
 		default:
 			searchDTO.setSortType("latest");
@@ -71,8 +73,8 @@ public class BoardServiceImpl implements BoardService {
 
 		return response;
 	}
-	
-	@Override 
+
+	@Override
 	public int countLike(Long idx) {
 		return boardMapper.countLike(idx);
 	}
@@ -84,7 +86,7 @@ public class BoardServiceImpl implements BoardService {
 	public List<LikeUserDTO> findLikeUsers(Long idx) {
 		return boardMapper.findLikeUsers(idx);
 	}
-	
+
 	@Override
 	public void save(BoardDTO boardDTO) {
 		boardMapper.save(boardDTO);
