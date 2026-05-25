@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.mapper.ReplyMapper">
+
+	<select id="findAllByBoardIdx" resultType="com.example.board.dto.ReplyDTO">
+		SELECT
+			r.reply_idx AS replyIdx,
+			r.board_idx AS boardIdx,
+			r.parent_reply_idx AS parentReplyIdx,
+			r.user_id AS userId,
+			m.user_name AS userName,
+			r.content AS content,
+			r.created_at AS createdAt,
+			r.updated_at AS updatedAt
+		FROM tb_board_reply r
+			INNER JOIN members m
+				ON r.user_id = m.user_id
+			WHERE r.board_idx = #{boardIdx}
+				AND r.parent_reply_idx IS NULL
+			ORDER BY r.created_at DESC, r.reply_idx DESC
+		</select>
+
+	<insert id="save" parameterType="com.example.board.dto.ReplyDTO">
+		INSERT INTO tb_board_reply(
+			board_idx,
+		 	user_id,
+		 	content
+		)
+        VALUES (
+        	#{boardIdx},
+     		#{userId},
+     		#{content}
+     	)
+    </insert>
+
+</mapper>
