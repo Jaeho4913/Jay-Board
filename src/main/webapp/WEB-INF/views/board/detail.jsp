@@ -47,6 +47,27 @@
 			</tr>
 		</table>
 
+		<div id="replyArea" style="margin-top:30px; border-top:1px solid #ddd; padding-top:20px;">
+
+			<h3>댓글</h3>
+
+				<div id="replyWriteArea" style="margin-bottom:15px;">
+					<textarea id="replyContent"
+									maxlength="1000"
+									placeholder="댓글을 입력하세요."
+									style="width:100%; height:80px; padding:10px; resize:none;"></textarea>
+
+					<div style="text-align:right; margin-top:5px;">
+						<span id="replyLength">0</span>/1000
+						<button type="button" id="btnReplySave">댓글 등록</button>
+					</div>
+				</div>
+
+				<div id="replyList">
+					댓글을 불러오는 중입니다...
+				</div>
+		</div>
+
 		<div id= "likeModal" style="display:none; position:fixed; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999;">
 			<div style="
 				background:white;
@@ -67,12 +88,26 @@
 			<button id="btnList">목록으로</button>
 			<span id="authBtnArea"></span>
 			<script>
+			const urlParams = new URLSearchParams(window.location.search);
+			const idx = urlParams.get('idx');
+			const page = urlParams.get('page') || 1;
+			const searchType = urlParams.get('searchType') || '';
+			const keyword = urlParams.get('keyword') || '';
+			const sortType = urlParams.get('sortType') || 'latest';
+
 			$(document).ready(function () {
 				getDetail();
+				getReplyList();
 
+				$("#btnReplySave").on("click", function() {
+					saveReply();
+				});
+				$("#replyContent").on("input", function() {
+					$("#replyLength").text($(this).val().length);
+				});
 				$("#btnCloseLikeModal").on("click", function() {
 					$("#likeModal").hide();
-				})
+				});
 				$("#btnList").on("click", function(){
 					location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
 				});
@@ -136,13 +171,6 @@
 				});
 			});
 
-			const urlParams = new URLSearchParams(window.location.search);
-			const idx = urlParams.get('idx');
-			const page = urlParams.get('page') || 1;
-			const searchType = urlParams.get('searchType') || '';
-			const keyword = urlParams.get('keyword') || '';
-			const sortType = urlParams.get('sortType') || 'latest';
-
 			function getDetail() {
 				$.ajax({
 					type: "GET",
@@ -179,7 +207,80 @@
 				});
 			}
 
+			function getReplyList() {
+				$.ajax({
+					type : "GET",
+					url : "/board/replies",
+					data : {boardIdx : idx},
+					dataType : "json",
+					success : function(res) {
+						if(res.status !== "success") {
+							$("#replyList").html("<div>" + res.message + "</div>");
+							return;
+						}
+						let replies = res.replyData;
+						let html = "";
 
+						if(!replies || replies.length === 0) {
+							html = "<div style='color:#777;'>등록된 댓글이 없습니다.</div>";
+						} else {
+								replies.forEach(function(reply){
+									html += '<div style="border-bottom:1px solid #eee; padding:10px 0;">';
+									html += '	<div style="font-weight:bold;">' + reply.userName + '</div>';
+									html += '	<div style="margin:5px 0;">' + reply.content + '</div>';
+									html += '	<div style="font-size:12px; color:#777;">' + reply.createdAt + '</div>';
+									html += '</div>';
+								});
+						}
+						$("#replyList").html(html);
+					},
+					error: function() {
+						$("#replyList").html("<div>댓글을 불러오지 못했습니다.</div>");
+					}
+				});
+			}
+
+			function saveReply() {
+				let content = $("#replyContent").val();
+
+				if (content == null || content.trim() === "") {
+					alert("댓글 내용을 입력해주세요.");
+					$("#replyContent").focus();
+					return;
+				}
+				if(content.length > 1000) {
+					alert("댓글은 1000자 이하로 작성해주세요.")
+					$("#replyContent").focus();
+					return;
+				}
+				$.ajax({
+					type: "POST",
+					url: "/board/reply/save",
+					data: {
+						boardIdx: idx,
+						content: content
+					},
+					dataType: "json",
+					success: function(res) {
+						if(res.status === "loginRequired") {
+							alert("로그인 후 댓글 작성해주세요.");
+							return;
+						}
+						if(res.status === "fail"){
+							alert(res.message);
+							return;
+						}
+						if(res.status === "success"){
+							$("#replyContent").val("");
+							$("#replyLength").text("0");
+							getReplyList();
+						}
+					},
+					error: function() {
+						alert("댓글 등록 중 오류가 발생했습니다.");
+					}
+				});
+			}
 			function guestUpdate() {
 				var pw = prompt("글 작성 시 입력한 비밀번호를 입력하세요 : ");
 				if (!pw) return;
