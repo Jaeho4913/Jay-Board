@@ -19,7 +19,13 @@
     <h2>✏️ 글 작성하기</h2>
 	<div id="wirteFormArea">
         <label>제목</label>
-        <input type="text"  id="title" placeholder="제목을 입력하세요" />
+        <input type="text"
+        		   id="title"
+        		   maxlength="100"
+        		   placeholder="제목을 입력하세요" />
+       		<div style="text-align:right; margin-bottom:10px;">
+				<span id="titleLength">0</span>/100
+			</div>
 	<c:choose>
 		<c:when test="${not empty sessionScope.loginMember }">
         	<label>작성자</label>
@@ -34,7 +40,13 @@
 		</c:otherwise>
 	</c:choose>
 	<label>내용</label>
-	<textarea  id="content" rows="10" placeholder="내용을 입력하세요"></textarea>
+	<textarea  id="content"
+					 rows="10"
+					 maxlength="3000"
+					 placeholder="내용을 입력하세요"></textarea>
+		<div style="text-align:right; margin-bottom:10px;">
+			<span id="contentLength">0</span>/3000
+		</div>
 
 		<div style="margin-top: 10px;">
 			<button type="button" onclick="saveBoard()" style="background-color: #007bff; color: white; border: none;">등록</button>
@@ -43,6 +55,15 @@
 	</div>
 
 	<script>
+		$(document).ready(function() {
+			$("#title").on("input", function() {
+			$("#titleLength").text($(this).val().length);
+			});
+
+			$("#content").on("input", function() {
+			$("#contentLength").text($(this).val().length);
+			});
+		});
 			function saveBoard() {
 				var title = $("#title").val().trim();
 				var writer = $("#writer").val().trim();
