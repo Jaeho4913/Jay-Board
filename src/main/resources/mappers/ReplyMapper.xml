@@ -35,4 +35,21 @@
      	)
     </insert>
 
+	<select id="findByReplyIdx" resultType="com.example.board.dto.ReplyDTO">
+		SELECT
+			reply_idx AS replyIdx,
+			board_idx AS boardIdx,
+			parent_reply_idx AS parentReplyIdx,
+			user_id AS userId,
+			content AS content,
+			created_at AS createdAt,
+			updated_at AS updatedAt
+		FROM tb_board_reply
+		WHERE reply_idx=#{replyIdx}
+		</select>
+
+		<delete id="delete">
+			DELETE FROM tb_board_reply
+			WHERE 	reply_idx=#{replyIdx}
+		</delete>
 </mapper>

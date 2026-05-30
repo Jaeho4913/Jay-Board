@@ -2,6 +2,7 @@ package com.example.board.service;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.board.dto.ReplyDTO;
@@ -12,6 +13,7 @@ public class ReplyServiceImpl implements ReplyService{
 
 	@Autowired
 	private ReplyMapper replyMapper;
+
 
 	@Override
 	public List<ReplyDTO> findAllByBoardIdx(Long boardIdx){
@@ -38,5 +40,28 @@ public class ReplyServiceImpl implements ReplyService{
 		replyDTO.setContent(content.trim());
 
 		replyMapper.save(replyDTO);
+	}
+
+	@Override
+	public void delete(Long replyIdx, String loginUserId) {
+
+		if (replyIdx == null) {
+			throw new IllegalArgumentException("삭제할 댓글 번호가 없습니다.");
+		}
+
+		if(loginUserId == null || loginUserId.trim().isEmpty()) {
+			throw new IllegalArgumentException("로그인 정보가 없습니다.");
+		}
+
+		ReplyDTO replyDTO = replyMapper.findByReplyIdx(replyIdx);
+
+		if(replyDTO == null) {
+			throw new IllegalArgumentException("존재하지 않는 댓글입니다.");
+		}
+
+		if(!replyDTO.getUserId().equals(loginUserId)) {
+			throw new IllegalArgumentException("댓글 삭제 권한이 없습니다.");
+		}
+		replyMapper.delete(replyIdx);
 	}
 }

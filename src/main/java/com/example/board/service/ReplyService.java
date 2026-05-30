@@ -8,4 +8,5 @@ public interface ReplyService {
 
 	List<ReplyDTO> findAllByBoardIdx(Long boardIdx);
 	void save(ReplyDTO replyDTO);
+	void delete(Long replyIdx, String loginUserId);
 }

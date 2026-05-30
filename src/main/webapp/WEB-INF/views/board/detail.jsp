@@ -229,6 +229,7 @@
 									html += '	<div style="font-weight:bold;">' + reply.userName + '</div>';
 									html += '	<div style="margin:5px 0;">' + reply.content + '</div>';
 									html += '	<div style="font-size:12px; color:#777;">' + reply.createdAt + '</div>';
+									html += ' <button type="button" onclick="deleteReply(' + reply.replyIdx +')">삭제</button>';
 									html += '</div>';
 								});
 						}
@@ -278,6 +279,36 @@
 					},
 					error: function() {
 						alert("댓글 등록 중 오류가 발생했습니다.");
+					}
+				});
+			}
+			function deleteReply(replyIdx) {
+				if(!confirm("댓글을 삭제하시겠습니까?")){
+					return;
+				}
+				$.ajax({
+					type:"POST",
+					url:"/board/reply/delete",
+					data:{
+						replyIdx:replyIdx
+					},
+					dataType:"json",
+					success: function(res){
+						if(res.status === "loginRequired") {
+							alert("로그인 후 댓글 작성해주세요.");
+							return;
+						}
+						if(res.status === "fail"){
+							alert(res.message);
+							return;
+						}
+						if(res.status === "success"){
+							alert("댓글이 삭제되었습니다.");
+							getReplyList();
+						}
+					},
+					error: function() {
+						alert("댓글 삭제 중 오류가 발생했습니다.");
 					}
 				});
 			}
