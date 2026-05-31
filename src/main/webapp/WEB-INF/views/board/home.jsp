@@ -47,10 +47,15 @@
 					<span style="cursor:pointer;" onclick="changeSort('likeDesc')">▲</span>
 					<span style="cursor:pointer;" onclick="changeSort('likeAsc')">▼</span>
 				</th>
+				<th>
+					댓글 수
+					<span style="cursor:pointer;" onclick="changeSort('replyDesc')">▲</span>
+					<span style="cursor:pointer;" onclick="changeSort('replyAsc')">▼</span>
+				</th>
 			</tr>
 		</thead>
 		<tbody id="boardList">
-			<tr><td colspan="6">로딩중입니다.</td></tr>
+			<tr><td colspan="7">로딩중입니다.</td></tr>
 		</tbody>
 	</table>
 
@@ -191,7 +196,7 @@ let currentSortType = 'latest';
 		const items = boardData.boardList;
 
 		if (!items || items.length === 0) {
-			tbody.append('<tr><td colspan="6">등록된 게시글이 없습니다.</td></tr>');
+			tbody.append('<tr><td colspan="7">등록된 게시글이 없습니다.</td></tr>');
 			return;
 		}
 
@@ -215,6 +220,7 @@ let currentSortType = 'latest';
 				<td>\${boardTime}</td>
 				<td>\${item.viewCnt}</td>
 				<td>\${item.likeCnt}</td>
+				<td>\${item.replyCnt || 0}</td>
 			</tr>
 			`;
 		});

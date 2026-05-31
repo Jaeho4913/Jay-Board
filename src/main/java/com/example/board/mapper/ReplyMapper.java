@@ -20,4 +20,6 @@ public interface ReplyMapper {
     void  delete(@Param("replyIdx") Long replyIdx);
 
     void update(ReplyDTO replyDTO);
+    
+    
 }

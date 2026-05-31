@@ -58,4 +58,5 @@
 			SET content=#{content}, updated_at=NOW()
 			WHERE reply_idx=#{replyIdx}
 		</update>
+	
 </mapper>

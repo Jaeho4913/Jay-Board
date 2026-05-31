@@ -7,7 +7,10 @@
 	<select id="findAll" resultType="com.example.board.dto.BoardDTO">
 		SELECT
 			b.*,
-			COALESCE(l.like_cnt, 0) AS likeCnt
+			COALESCE(l.like_cnt, 0) AS likeCnt,
+				(SELECT COUNT(*)
+				FROM tb_board_reply r
+				WHERE r.board_idx = b.idx) AS replyCnt
 			FROM tb_board b
 			LEFT JOIN (
 				SELECT board_idx, COUNT(*) AS like_cnt
@@ -36,7 +39,7 @@
 			</when>
 
 			<when test = "sortType == 'oldest'">
-				ORDER BY b.created_at ASC, idx ASC
+				ORDER BY b.created_at ASC, b.idx ASC
 			</when>
 
 			<when test = "sortType == 'viewDesc'">
@@ -54,6 +57,15 @@
 			<when test = "sortType == 'likeAsc'">
 				ORDER BY COALESCE(l.like_cnt, 0) ASC, b.created_at DESC, b.idx DESC
 			</when>
+
+			<when test = "sortType == 'replyDesc'">
+				ORDER BY replyCnt Desc,  b.created_at DESC, b.idx DESC
+			</when>
+
+			<when test = "sortType == 'replyAsc'">
+				ORDER BY replyCnt Asc,  b.created_at DESC, b.idx DESC
+			</when>
+
 
 			<otherwise>
 				ORDER BY b.created_at DESC, b.idx DESC

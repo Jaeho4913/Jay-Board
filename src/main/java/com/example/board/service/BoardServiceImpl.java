@@ -42,13 +42,15 @@ public class BoardServiceImpl implements BoardService {
 			return;
 		}
 		switch(sortType) {
-		case "latest":
-		case "oldest":
-		case "viewDesc":
-		case "viewAsc":
-		case "likeDesc":
-		case "likeAsc":
-			break;
+			case "latest":
+			case "oldest":
+			case "viewDesc":
+			case "viewAsc":
+			case "likeDesc":
+			case "likeAsc":
+			case "replyDesc":
+			case "replyAsc":
+				break;
 		default:
 			searchDTO.setSortType("latest");
 		}

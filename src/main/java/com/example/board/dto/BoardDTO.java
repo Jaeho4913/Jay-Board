@@ -18,6 +18,7 @@ public class BoardDTO {
     private boolean isGuest;
     private int likeCnt;
     private boolean likeCheck;
+    private int replyCnt;
 }
 //    // --- Getter/Setter ---
 //
