@@ -225,11 +225,37 @@
 							html = "<div style='color:#777;'>등록된 댓글이 없습니다.</div>";
 						} else {
 								replies.forEach(function(reply){
+
+									let replyTime = reply.createdAt;
+
+									if(reply.updatedAt && reply.updateAt !== reply.createdAt) {
+										replyTime = reply.updatedAt + "수정됨";
+									}
+
 									html += '<div style="border-bottom:1px solid #eee; padding:10px 0;">';
-									html += '	<div style="font-weight:bold;">' + reply.userName + '</div>';
-									html += '	<div style="margin:5px 0;">' + reply.content + '</div>';
-									html += '	<div style="font-size:12px; color:#777;">' + reply.createdAt + '</div>';
-									html += ' <button type="button" onclick="deleteReply(' + reply.replyIdx +')">삭제</button>';
+									html += '<div style="font-weight:bold;">' + reply.userName + '</div>';
+									html += '<div id="replyView_' + reply.replyIdx + '">';
+									html += '<div style="margin:5px 0;">' + reply.content + '</div>';
+									html += '<div style="font-size:12px; color:#777;">' + replyTime + '</div>';
+									if(reply.myReply === true) {
+										html += '<div style="margin-top:5px;">';
+										html += '	<button type="button" onclick="showReplyEdit(' + reply.replyIdx +')">수정</button>';
+										html += '	<button type="button" onclick="deleteReply(' + reply.replyIdx +')">삭제</button>';
+										html += '</div>'
+									}
+									html += '</div>';
+										if(reply.myReply === true) {
+										html += '<div id="replyEdit_' + reply.replyIdx + '" style="display:none; margin-top:5px;">';
+										html += '	<textarea id="replyEditContent_' + reply.replyIdx + '" maxlength="1000" style="width:100%; height:80px; padding:10px; resize:none;">' + reply.content +'</textarea>';
+										html += '	<div style="text-align:right; margin-top:5px;">';
+										html += '		<span id="replyEditLength_' + reply.replyIdx + '">' +reply.content.length +'</span>/1000';
+										html += '	</div>';
+										html += '	<div style="margin-top:5px;">';
+										html += '		<button type="button" onclick="updateReply(' + reply.replyIdx +')">저장</button>';
+										html += '		<button type="button" onclick="cancelReplyEdit(' + reply.replyIdx +')">취소</button>';
+										html += '	</div>';
+										html +='</div>';
+										}
 									html += '</div>';
 								});
 						}
@@ -312,6 +338,61 @@
 					}
 				});
 			}
+			function showReplyEdit(replyIdx){
+				$("#replyView_"+ replyIdx).hide();
+				$("#replyEdit_" + replyIdx).show();
+
+				let content = $("#replyEditContent_" + replyIdx).val();
+				$("#replyEditLength_" + replyIdx).text(content.length);
+				$("#replyEditContent_" + replyIdx).focus();
+			}
+			function cancelReplyEdit(replyIdx){
+				getReplyList();
+			}
+			function updateReply(replyIdx){
+				let content = $("#replyEditContent_" + replyIdx).val();
+
+				if (content == null || content.trim() === "") {
+					alert("댓글 내용을 입력해주세요.");
+					$("#replyEditContent_" + replyIdx).focus();
+					return;
+				}
+				content = content.trim();
+
+				if(content.length > 1000) {
+					alert("댓글은 1000자 이하로 작성해주세요.")
+					$("#replyEditContent_" + replyIdx).focus();
+					return;
+				}
+				$.ajax({
+					type: "POST",
+					url: "/board/reply/update",
+					data: {
+						replyIdx: replyIdx,
+						content: content
+					},
+					dataType: "json",
+					success: function(res) {
+						if(res.status === "loginRequired") {
+							alert("로그인 후 댓글 작성해주세요.");
+							return;
+						}
+						if(res.status === "fail"){
+							alert(res.message);
+							return;
+						}
+						if(res.status === "success"){
+							alert("댓글이 수정되었습니다.");
+							getReplyList();
+						}
+					},
+					error: function() {
+						alert("댓글 수정 중 오류가 발생했습니다.");
+					}
+				});
+			}
+
+
 			function guestUpdate() {
 				var pw = prompt("글 작성 시 입력한 비밀번호를 입력하세요 : ");
 				if (!pw) return;

@@ -52,4 +52,10 @@
 			DELETE FROM tb_board_reply
 			WHERE 	reply_idx=#{replyIdx}
 		</delete>
+
+		<update id="update" parameterType="com.example.board.dto.ReplyDTO">
+			UPDATE tb_board_reply
+			SET content=#{content}, updated_at=NOW()
+			WHERE reply_idx=#{replyIdx}
+		</update>
 </mapper>

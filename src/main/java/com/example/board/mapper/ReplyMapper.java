@@ -18,4 +18,6 @@ public interface ReplyMapper {
     ReplyDTO findByReplyIdx(@Param("replyIdx") Long replyIdx);
 
     void  delete(@Param("replyIdx") Long replyIdx);
+
+    void update(ReplyDTO replyDTO);
 }

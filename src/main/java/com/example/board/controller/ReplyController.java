@@ -16,6 +16,7 @@ import com.example.board.dto.MemberDTO;
 import com.example.board.dto.ReplyDTO;
 import com.example.board.service.ReplyService;
 
+import ch.qos.logback.core.net.LoginAuthenticator;
 import jakarta.servlet.http.HttpSession;
 
 
@@ -85,6 +86,26 @@ public class ReplyController {
 		}
 		try {
 			replyService.delete(replyDTO.getReplyIdx(), loginMemberDTO.getUserId());
+			resultMap.put("status", "success");
+		} catch (IllegalArgumentException e) {
+			resultMap.put("status", "fail");
+			resultMap.put("message", e.getMessage());
+		}
+		return ResponseEntity.ok(resultMap);
+	}
+	@ResponseBody
+	@PostMapping("/board/reply/update")
+	public ResponseEntity<Map<String, Object>> update(@ModelAttribute ReplyDTO replyDTO, HttpSession session) {
+
+		Map<String, Object> resultMap = new HashMap<>();
+		MemberDTO loginMemberDTO = (MemberDTO)session.getAttribute("loginMember");
+
+		if(loginMemberDTO == null) {
+			resultMap.put("status", "loginRequired");
+			return ResponseEntity.ok(resultMap);
+		}
+		try {
+			replyService.update(replyDTO, loginMemberDTO.getUserId());
 			resultMap.put("status", "success");
 		} catch (IllegalArgumentException e) {
 			resultMap.put("status", "fail");
