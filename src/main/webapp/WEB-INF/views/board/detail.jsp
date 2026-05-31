@@ -206,7 +206,11 @@
 					}
 				});
 			}
+			function formatReplyTime(time) {
+				if(!time) return "";
 
+				return time.replace("T", " ").substring(0, 16);
+			}
 			function getReplyList() {
 				$.ajax({
 					type : "GET",
@@ -226,10 +230,13 @@
 						} else {
 								replies.forEach(function(reply){
 
-									let replyTime = reply.createdAt;
+									let createdReplyTime = formatReplyTime(reply.createdAt);
+									let updatedReplyTime = formatReplyTime(reply.updatedAt);
 
-									if(reply.updatedAt && reply.updateAt !== reply.createdAt) {
-										replyTime = reply.updatedAt + "수정됨";
+									let replyTime = createdReplyTime;
+
+									if(updatedReplyTime && updatedReplyTime !== createdReplyTime) {
+										replyTime = updatedReplyTime + "수정됨";
 									}
 
 									html += '<div style="border-bottom:1px solid #eee; padding:10px 0;">';

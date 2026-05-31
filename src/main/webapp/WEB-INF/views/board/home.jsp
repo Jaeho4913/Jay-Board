@@ -184,7 +184,6 @@ let currentSortType = 'latest';
 		}
 		authArea.html(html);
 	}
-
 	function setBoardList(boardData) {
 		const tbody = $('#boardList');
 		tbody.empty();
