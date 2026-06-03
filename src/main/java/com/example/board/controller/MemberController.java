@@ -1,12 +1,10 @@
 package com.example.board.controller;
 
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -19,27 +17,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.example.board.SecurityConfig;
-import com.example.board.dto.LoginDTO;
 import com.example.board.dto.MemberDTO;
 import com.example.board.service.MemberService;
-import com.example.board.service.MemberServiceImpl;
+
 
 
 @Controller
 @RequestMapping("/member")
 public class MemberController {
 
-    private final SecurityConfig securityConfig;
 	private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
 
 	@Autowired
 	private MemberService memberService;
-
-    MemberController(SecurityConfig securityConfig) {
-        this.securityConfig = securityConfig;
-    }
-
 	@GetMapping("/save")
 	public String saveForm() {
 		logger.info("회원가입 페이지 진입");
@@ -69,17 +59,6 @@ public class MemberController {
 		return "member/login";
 	}
 
-	@PostMapping("/loginPost")
-	public String loginPost(@ModelAttribute LoginDTO loginDTO, HttpSession session) throws Exception {
-		logger.info("로그인 요청: " + loginDTO.getUserId());
-		MemberDTO loginResult = memberService.login(loginDTO);
-		if (loginResult != null) {
-			session.setAttribute("loginMember", loginResult);
-			return "redirect:/";
-		} else {
-			return "member/login";
-		}
-	}
 	@GetMapping("/updatePw")
 	public String updatePwForm(HttpSession session) {
 		if (session.getAttribute("loginMember") == null) {
@@ -87,11 +66,7 @@ public class MemberController {
 		}
 		return "member/updatePw";
 	}
-	@GetMapping("/logout")
-	public String logout(HttpSession session) {
-		session.invalidate();
-		return "redirect:/";
-	}
+
 	@GetMapping("/find")
 	public String findMember() {
 		return "member/findMember";

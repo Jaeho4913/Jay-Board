@@ -26,19 +26,8 @@
        		<div style="text-align:right; margin-bottom:10px;">
 				<span id="titleLength">0</span>/100
 			</div>
-	<c:choose>
-		<c:when test="${not empty sessionScope.loginMember }">
         	<label>작성자</label>
         	<input type="text"  id="writer" value="${sessionScope.loginMember.userName}" readonly="readonly"/>
-			<input type="hidden" id="boardPw" value="" />
-			</c:when>
-		<c:otherwise>
-			<label>작성자(닉네임)</label>
-			<input type="text" id="writer" placeholder="작성자 닉네임을 입력해주세요." />
-			<label>글 비밀번호</label>
-			<input type="password" id="boardPw" placeholder="수정/삭제 시 사용할 비밀번호를 입력해주세요." />
-		</c:otherwise>
-	</c:choose>
 	<label>내용</label>
 	<textarea  id="content"
 					 rows="10"
@@ -80,11 +69,6 @@
 					$("#writer").focus();
 					return;
 				}
-				if($("#boardPw").attr("type") !== "hidden" && boardPw === "") {
-					alert("게시글 비밀번호를 입력해주세요.");
-					$("#boardPw").focus();
-					return;
-				}
 
 				if (content === "") {
 					alert("본문을 입력해주세요.");
@@ -98,7 +82,6 @@
 					data: {
 						title: title,
 						writer: writer,
-						boardPw: boardPw,
 						content: content
 					},
 					success: function(result) {

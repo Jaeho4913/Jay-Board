@@ -195,10 +195,6 @@
 							let btnHtml = '<button onclick="location.href=\'/board/update?idx=' + idx +'\'">수정</button>' +
 												'<button onclick= "authDelete()">삭제</button>';
 							$("#authBtnArea").html(btnHtml);
-						} else if (response.isGuest === true) {
-							let btnHtml = '<button onclick="guestUpdate()">수정</button>' +
-												'<button onclick="guestDelete()">삭제</button>';
-							$("#authBtnArea").html(btnHtml);
 						}
 					},
 					error: function() {
@@ -236,7 +232,7 @@
 									let replyTime = createdReplyTime;
 
 									if(updatedReplyTime && updatedReplyTime !== createdReplyTime) {
-										replyTime = updatedReplyTime + "수정됨";
+										replyTime = updatedReplyTime + "  수정됨";
 									}
 
 									html += '<div style="border-bottom:1px solid #eee; padding:10px 0;">';
@@ -397,49 +393,6 @@
 						alert("댓글 수정 중 오류가 발생했습니다.");
 					}
 				});
-			}
-
-
-			function guestUpdate() {
-				var pw = prompt("글 작성 시 입력한 비밀번호를 입력하세요 : ");
-				if (!pw) return;
-
-				fetch('/board/checkGuestPw', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-				body: 'idx=' + idx + '&boardPw=' + encodeURIComponent(pw)
-				})
-				.then(response => response.text())
-				.then(result => {
-					if (result === "success") {
-						location.href = '/board/update?idx=' + idx + '&boardPw=' + pw;
-					} else {
-						alert("비밀번호가 일치하지 않습니다.")
-					}
-				})
-				.catch(error => console.error('Error:', error));
-			}
-			function guestDelete() {
-				var pw = prompt("글 작성 시 입력한 비밀번호를 입력하세요: ");
-				if (!pw) return;
-
-				if (!confirm("정말 삭제하시겠습니까?")) return;
-
-				fetch('/board/deleteGuestPost', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
-					body: 'idx=' + idx + '&boardPw=' + encodeURIComponent(pw)
-				})
-				.then(response => response.text())
-				.then(result => {
-					if (result === "success") {
-						alert("게시글이 삭제되었습니다.");
-						location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
-					} else {
-						alert("비밀번호가 일치하지 않습니다.");
-					}
-				})
-				.catch(error => console.error('Error: ', error));
 			}
 			function authDelete() {
 				if(!confirm("정말 삭제하시겠습니까?")) return;

@@ -16,7 +16,6 @@
 
 	<div id="updateFormArea">
         <input type="hidden" id="idx" value="">
-        <input type="hidden" id="boardPw" value="">
 
         <label>제목</label>
         <input type="text" id="title" required>
@@ -38,7 +37,6 @@
 		const urlParams = new URLSearchParams(window.location.search);
 
 		const idx = urlParams.get('idx');
-		const boardPw = urlParams.get('boardPw') || "";
 
 		$.ajax({
 			type: "GET",
@@ -49,7 +47,6 @@
 
 				console.log(board);
 				$("#idx").val(board.idx);
-				$("#boardPw").val(boardPw);
 				$("#title").val(board.title);
 				$("#writer").val(board.writer);
 				$("#content").val(board.content);
@@ -65,7 +62,6 @@
 			var title = $("#title").val().trim();
 			var writer = $("#writer").val().trim();
 			var content = $("#content").val().trim();
-			var boardPw = $("#boardPw").val().trim();
 
 			if(title === "" || content === "") {
 				alert("제목과 내용은 필수 입력입니다.");
@@ -80,7 +76,6 @@
 					title: title,
 					writer: writer,
 					content: content,
-					boardPw: boardPw
 					},
 			success: function(result) {
 

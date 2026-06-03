@@ -84,35 +84,13 @@ public class BoardController {
         } else {
         	board.setLikeCheck(false);
         }
-        if (board.getBoardPw() != null && !board.getBoardPw().isEmpty()) {
-            board.setGuest(true);
-        }
-        else {
-            if(loginMember != null && loginMember.getUserId().equals(board.getUserId())) {
-                board.setAuth(true);
-            }
-        }
+         if(loginMember != null && loginMember.getUserId().equals(board.getUserId())) {
+        	 board.setAuth(true);
+         }
+
         return ResponseEntity.ok(board);
     }
-    @ResponseBody
-    @PostMapping("/board/checkGuestPw")
-    public ResponseEntity<String> checkGuestPw(@RequestParam("idx") Long idx, @RequestParam("boardPw") String boardPw) {
-        BoardDTO board = boardService.findById(idx);
-        if (board != null && boardPw.equals(board.getBoardPw())) {
-            return ResponseEntity.ok("success");
-        }
-        return ResponseEntity.ok("fail");
-    }
-    @ResponseBody
-    @PostMapping("/board/deleteGuestPost")
-    public ResponseEntity<String> deleteGuestPost(@RequestParam("idx") Long idx, @RequestParam("boardPw") String boardPw) {
-        BoardDTO board = boardService.findById(idx);
-        if (board != null && boardPw.equals(board.getBoardPw())) {
-            boardService.delete(idx);
-            return ResponseEntity.ok("success");
-        }
-        return ResponseEntity.ok("fail");
-    }
+
     @ResponseBody
     @GetMapping("/api/boards")
     public ResponseEntity<Map<String, Object>> getBoardList(@ModelAttribute SearchDTO searchDTO, HttpSession session) {
@@ -160,65 +138,53 @@ public List<LikeUserDTO> likeUsers(@RequestParam("idx") Long idx) {
 public ResponseEntity<String> save(BoardDTO boardDTO, HttpSession session) {
     MemberDTO loginMemberDTO = (MemberDTO) session.getAttribute("loginMember");
 
-    if(loginMemberDTO != null) {
-        boardDTO.setUserId(loginMemberDTO.getUserId());
+    if(loginMemberDTO == null) {
+       return ResponseEntity.status(401).body("loginRequired");
     }
+    boardDTO.setUserId(loginMemberDTO.getUserId());
+    boardDTO.setWriter(loginMemberDTO.getUserName());
+
     boardService.save(boardDTO);
     return ResponseEntity.ok("success");
 }
 @ResponseBody
 @PostMapping("/board/update")
 public ResponseEntity<String> update(BoardDTO boardDTO, HttpSession session) {
-    if (boardDTO.getIdx() == null) return ResponseEntity.ok("fail");
-    BoardDTO originalBoard = boardService.findById(boardDTO.getIdx());
-    if (originalBoard == null) return ResponseEntity.ok("fail");
-    MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 
-    boolean isAuth = false;
-    if (originalBoard.getBoardPw() != null && !originalBoard.getBoardPw().trim().isEmpty()) {
-        if (boardDTO.getBoardPw() != null && boardDTO.getBoardPw().equals(originalBoard.getBoardPw())) {
-            isAuth = true;
-        }
-    }
-    else {
-        if(loginMember != null && originalBoard.getUserId() != null) {
-            if (loginMember.getUserId().equals(originalBoard.getUserId())) {
-                isAuth= true;
-            }
-        }
-    }
+	MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
 
-    if (!isAuth ) {
-        return ResponseEntity.ok("fail");
-    }
+	if(loginMember == null) {
+		return ResponseEntity.ok("fail");
+	}
+	BoardDTO originalBoard = boardService.findById(boardDTO.getIdx());
 
+	if(originalBoard == null) {
+		return ResponseEntity.ok("fail");
+	}
+
+	if(!loginMember.getUserId().equals(originalBoard.getUserId())) {
+		return ResponseEntity.ok("fail");
+	}
     boardService.update(boardDTO);
     return ResponseEntity.ok("success");
 }
 @ResponseBody
 @GetMapping("/board/delete")
-public ResponseEntity<String> delete(@RequestParam("idx") Long idx,
-                                                          @RequestParam(value = "boardPw", required = false) String boardPw,
-                                                          HttpSession session) {
-    BoardDTO originalBoard = boardService.findById(idx);
-    if (originalBoard == null) return ResponseEntity.ok("fail");
-    MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-    boolean isAuth = false;
-    if (originalBoard.getBoardPw() != null && !originalBoard.getBoardPw().trim().isEmpty()) {
-        if (boardPw != null && boardPw.equals(originalBoard.getBoardPw())) {
-            isAuth = true;
-        }
-    }
-    else {
-        if(loginMember != null && originalBoard.getUserId() != null) {
-            if (loginMember.getUserId().equals(originalBoard.getUserId())) {
-                isAuth= true;
-            }
-        }
-    }
-    if (!isAuth) {
-        return ResponseEntity.ok("fail");
-    }
+public ResponseEntity<String> delete(@RequestParam("idx") Long idx, HttpSession session) {
+	MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
+
+	if(loginMember == null) {
+		return ResponseEntity.status(401).body("loginRequired");
+	}
+
+	BoardDTO originalBoard = boardService.findById(idx);
+
+	if(originalBoard == null) {
+		return ResponseEntity.ok("fail");
+	}
+	if(!loginMember.getUserId().equals(originalBoard.getUserId())) {
+		return ResponseEntity.ok("fail");
+	}
     boardService.delete(idx);
     return ResponseEntity.ok("success");
 }

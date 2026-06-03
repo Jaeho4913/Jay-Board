@@ -172,12 +172,6 @@ let currentSortType = 'latest';
             	회원가입
         	</button>
 
-       	 	<button type="button"
-            	onclick="location.href='\${writeUrl}'"
-            	style="cursor:pointer; background-color:#28a745; color:white; border:none; padding:6px 12px;">
-             	글쓰기
-        	</button>
-
             </form>
 
             <div style="margin-top:10px; font-size:0.9em;">
