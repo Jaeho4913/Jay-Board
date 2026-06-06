@@ -10,6 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import com.example.board.security.CustomLoginFailureHandler;
 import com.example.board.security.CustomLoginSuccessHandler;
+import com.example.board.security.CustomAuthenticationEntryPoint;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,7 @@ public class SecurityConfig {
 
 	private final CustomLoginSuccessHandler customLoginSuccessHandler;
 	private final CustomLoginFailureHandler customLoginFailureHandler;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -81,6 +83,9 @@ public class SecurityConfig {
 						.logoutSuccessUrl("/")
 						.invalidateHttpSession(true)
 						.deleteCookies("JSESSIONID")
+				)
+				.exceptionHandling(exception -> exception
+						.authenticationEntryPoint(customAuthenticationEntryPoint)
 				);
 
 			return http.build();

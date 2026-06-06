@@ -95,6 +95,14 @@
 			const keyword = urlParams.get('keyword') || '';
 			const sortType = urlParams.get('sortType') || 'latest';
 
+			function handleAuthAjaxError(xhr, message, loginMessage) {
+				if (xhr.status === 401) {
+					alert(loginMessage || "로그인 후 사용 가능합니다.");
+					location.href = "/member/login";
+					return;
+				}
+				alert(message);
+			}
 			$(document).ready(function () {
 				getDetail();
 				getReplyList();
@@ -137,8 +145,8 @@
 								}
 							}
 						},
-						error: function() {
-							alert("오류가 발생했습니다.");
+						error: function(xhr) {
+							handleAuthAjaxError(xhr, "오류가 발생했습니다.", "로그인 후 가능합니다." )
 						}
 					});
 				});
@@ -306,8 +314,8 @@
 							getReplyList();
 						}
 					},
-					error: function() {
-						alert("댓글 등록 중 오류가 발생했습니다.");
+					error: function(xhr) {
+						handleAuthAjaxError(xhr, "댓글 등록 중 오류가 발생했습니다.", "로그인 후 작성 가능합니다." )
 					}
 				});
 			}
@@ -336,8 +344,8 @@
 							getReplyList();
 						}
 					},
-					error: function() {
-						alert("댓글 삭제 중 오류가 발생했습니다.");
+					error: function(xhr) {
+						handleAuthAjaxError(xhr, "댓글 삭제 중 오류가 발생했습니다.", "로그인 후 이용 가능합니다." )
 					}
 				});
 			}
@@ -389,8 +397,8 @@
 							getReplyList();
 						}
 					},
-					error: function() {
-						alert("댓글 수정 중 오류가 발생했습니다.");
+					error: function(xhr) {
+						handleAuthAjaxError(xhr, "댓글 수정 중 오류가 발생했습니다.", "로그인 후 사용 가능합니다." )
 					}
 				});
 			}
@@ -410,8 +418,8 @@
 							alert("게시글을 삭제할 수 없습니다.")
 						}
 					},
-					error: function() {
-						alert("서버 통신 오륙 발생했습니다.")
+					error: function(xhr) {
+						handleAuthAjaxError(xhr, "게시글 삭제 중 오류가 발생했습니다.", "로그인 후 사용 가능합니다." )
 					}
 				})
 
