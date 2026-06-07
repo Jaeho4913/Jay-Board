@@ -1,23 +1,22 @@
 package com.example.board.controller;
 
 import java.util.Map;
+
 import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.example.board.dto.MemberDTO;
 import com.example.board.dto.ReplyDTO;
 import com.example.board.service.ReplyService;
 
-import ch.qos.logback.core.net.LoginAuthenticator;
-import jakarta.servlet.http.HttpSession;
 
 
 @Controller
@@ -28,7 +27,8 @@ public class ReplyController {
 
 	@ResponseBody
 	@GetMapping("/board/replies")
-	public ResponseEntity<Map<String, Object>>getReplyList(@ModelAttribute ReplyDTO replyDTO, HttpSession session) {
+	public ResponseEntity<Map<String, Object>>getReplyList(@ModelAttribute ReplyDTO replyDTO,
+																													 Authentication authentication) {
 
 		Map<String, Object> resultMap = new HashMap<>();
 
@@ -40,10 +40,11 @@ public class ReplyController {
 			return ResponseEntity.ok(resultMap);
 		}
 		List<ReplyDTO>replyList = replyService.findAllByBoardIdx(boardIdx);
-		MemberDTO loginMemberDTO = (MemberDTO)session.getAttribute("loginMember");
-		if (loginMemberDTO != null) {
+
+		if (authentication != null && authentication.getName() !=null) {
+			String loginUserId = authentication.getName();
 			for (ReplyDTO reply : replyList) {
-				boolean myReply = loginMemberDTO.getUserId().equals(reply.getUserId());
+				boolean myReply = loginUserId.equals(reply.getUserId());
 				reply.setMyReply(myReply);
 			}
 		}
@@ -53,16 +54,17 @@ public class ReplyController {
 	}
 	@ResponseBody
 	@PostMapping("/board/reply/save")
-	public ResponseEntity<Map<String, Object>> save(@ModelAttribute ReplyDTO replyDTO, HttpSession session) {
+	public ResponseEntity<Map<String, Object>> save(@ModelAttribute ReplyDTO replyDTO,
+																											Authentication authentication) {
 
 		Map<String, Object> resultMap = new HashMap<>()	;
-		MemberDTO loginMemberDTO = (MemberDTO)session.getAttribute("loginMember");
 
-		if(loginMemberDTO == null) {
+		if(authentication == null || authentication.getName() == null) {
 			resultMap.put("status", "loginRequired");
 			return ResponseEntity.ok(resultMap);
 		}
-		replyDTO.setUserId(loginMemberDTO.getUserId());
+		String loginUserId = authentication.getName();
+		replyDTO.setUserId(loginUserId);
 
 		try {
 			replyService.save(replyDTO);
@@ -75,17 +77,17 @@ public class ReplyController {
 	}
 	@ResponseBody
 	@PostMapping("/board/reply/delete")
-	public ResponseEntity<Map<String, Object>> delete(@ModelAttribute ReplyDTO replyDTO, HttpSession session) {
+	public ResponseEntity<Map<String, Object>> delete(@ModelAttribute ReplyDTO replyDTO, Authentication authentication) {
 
 		Map<String, Object> resultMap = new HashMap<>();
-		MemberDTO loginMemberDTO = (MemberDTO)session.getAttribute("loginMember");
 
-		if(loginMemberDTO == null) {
+		if(authentication == null || authentication.getName() == null) {
 			resultMap.put("status", "loginRequired");
 			return ResponseEntity.ok(resultMap);
 		}
+		String loginUserId = authentication.getName();
 		try {
-			replyService.delete(replyDTO.getReplyIdx(), loginMemberDTO.getUserId());
+			replyService.delete(replyDTO.getReplyIdx(), loginUserId);
 			resultMap.put("status", "success");
 		} catch (IllegalArgumentException e) {
 			resultMap.put("status", "fail");
@@ -95,17 +97,18 @@ public class ReplyController {
 	}
 	@ResponseBody
 	@PostMapping("/board/reply/update")
-	public ResponseEntity<Map<String, Object>> update(@ModelAttribute ReplyDTO replyDTO, HttpSession session) {
+	public ResponseEntity<Map<String, Object>> update(@ModelAttribute ReplyDTO replyDTO,
+																												Authentication authentication) {
 
 		Map<String, Object> resultMap = new HashMap<>();
-		MemberDTO loginMemberDTO = (MemberDTO)session.getAttribute("loginMember");
 
-		if(loginMemberDTO == null) {
+		if(authentication == null || authentication.getName() == null) {
 			resultMap.put("status", "loginRequired");
 			return ResponseEntity.ok(resultMap);
 		}
+		String loginUserId = authentication.getName();
 		try {
-			replyService.update(replyDTO, loginMemberDTO.getUserId());
+			replyService.update(replyDTO, loginUserId);
 			resultMap.put("status", "success");
 		} catch (IllegalArgumentException e) {
 			resultMap.put("status", "fail");
@@ -114,4 +117,3 @@ public class ReplyController {
 		return ResponseEntity.ok(resultMap);
 	}
 }
-
