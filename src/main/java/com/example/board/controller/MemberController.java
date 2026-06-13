@@ -1,11 +1,11 @@
 package com.example.board.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.board.dto.MemberDTO;
+import com.example.board.security.CustomUserDetails;
 import com.example.board.service.MemberService;
 
 
@@ -28,6 +29,12 @@ public class MemberController {
 
 	private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
 
+	private boolean isLogin(Authentication authentication) {
+		return authentication != null
+				&& authentication.isAuthenticated()
+				&& authentication.getPrincipal() instanceof CustomUserDetails;
+	}
+
 	@Autowired
 	private MemberService memberService;
 	@GetMapping("/save")
@@ -37,22 +44,22 @@ public class MemberController {
 	}
 
 	@PostMapping("/save")
-	public String save(@ModelAttribute MemberDTO memberDTO, HttpServletRequest request, Model model) {
+	public String save(@ModelAttribute MemberDTO memberDTO,  Model model) {
 		logger.info("회원가입 요청 : " + memberDTO.getUserId());
+
 		if (memberDTO.getUserId() == null || memberDTO.getUserId().trim().isEmpty()) {
 			return "member/save";
 		}
+
 		try {
 		memberService.save(memberDTO);
-		HttpSession session = request.getSession();
-		session.setAttribute("loginMember", memberDTO);
-		return "redirect:/";
-	} catch (DuplicateKeyException e) {
+		return "redirect:/member/login";
+		} catch (DuplicateKeyException e) {
 		logger.error("중복 가입 시도 : " + e.getMessage());
 		model.addAttribute("errorMessage", "이미 사용 중인 아이디거나 이메일입니다.");
 		return "member/save";
+		}
 	}
-}
 
 	@GetMapping("/login")
 	public String loginGet() {
@@ -60,10 +67,7 @@ public class MemberController {
 	}
 
 	@GetMapping("/updatePw")
-	public String updatePwForm(HttpSession session) {
-		if (session.getAttribute("loginMember") == null) {
-			return "redirect:/member/login";
-		}
+	public String updatePwForm() {
 		return "member/updatePw";
 	}
 
@@ -128,15 +132,19 @@ public class MemberController {
 			return ResponseEntity.ok("fail");
 		}
 	}
+
 	@ResponseBody
 	@PostMapping("/updatePw")
 	public ResponseEntity<String> updatePw(@RequestParam("currentPw") String currentPw,
-																   @RequestParam("newPw") String newPw, HttpSession session) {
-		MemberDTO loginMember = (MemberDTO) session.getAttribute("loginMember");
-		if (loginMember == null) {
+																   @RequestParam("newPw") String newPw,
+																   Authentication authentication,
+																   HttpSession session) {
+
+		if (!isLogin(authentication)) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("fail");
 		}
-		boolean isChanged = memberService.changePassword(loginMember.getUserId(), currentPw, newPw);
+		String loginUserId = authentication.getName();
+		boolean isChanged = memberService.changePassword(loginUserId, currentPw, newPw);
 
 		if (isChanged) {
 			session.invalidate();

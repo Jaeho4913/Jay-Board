@@ -1,5 +1,4 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
 <html>
@@ -17,7 +16,7 @@
 </head>
 <body>
     <h2>✏️ 글 작성하기</h2>
-	<div id="wirteFormArea">
+	<div id="writeFormArea">
         <label>제목</label>
         <input type="text"
         		   id="title"
@@ -26,8 +25,6 @@
        		<div style="text-align:right; margin-bottom:10px;">
 				<span id="titleLength">0</span>/100
 			</div>
-        	<label>작성자</label>
-        	<input type="text"  id="writer" value="${sessionScope.loginMember.userName}" readonly="readonly"/>
 	<label>내용</label>
 	<textarea  id="content"
 					 rows="10"
@@ -55,8 +52,6 @@
 		});
 			function saveBoard() {
 				var title = $("#title").val().trim();
-				var writer = $("#writer").val().trim();
-				var boardPw = $("#boardPw").val() ? $("#boardPw").val().trim(): "";
 				var content = $("#content").val().trim();
 
 				if (title === "") {
@@ -64,12 +59,6 @@
 					$("#title").focus();
 					return;
 				}
-				if (writer === "") {
-					alert("작성자를 입력해주세요.");
-					$("#writer").focus();
-					return;
-				}
-
 				if (content === "") {
 					alert("본문을 입력해주세요.");
 					$("#content").focus();
@@ -81,20 +70,26 @@
 					url: "/board/save",
 					data: {
 						title: title,
-						writer: writer,
 						content: content
 					},
 					success: function(result) {
 						if (result === "success") {
 							alert("게시글이 성공적으로 등록되었습니다!")
 							location.href = "/";
-
+						} else  if(result === "loginRequired") {
+							alert("로그인 후 작성 가능합니다.");
+							location.href = "/member/login";
 						} else {
-						alert("게시글 등록에 실패했습니다.")
+						alert("게시글 등록에 실패했습니다.");
 					}
 				},
-				error: function(err) {
-					alert("서버 통신 중 오류가 발생.");
+				error: function(xhr) {
+					if (xhr.status === 401) {
+						alert("로그인 후 작성 가능합니다.");
+						location.href = "/member/login";
+						return;
+					}
+					alert("서버 통신 중 오류가 발생했습니다.");
 				}
 			});
 		}
