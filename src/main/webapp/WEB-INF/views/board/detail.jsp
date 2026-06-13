@@ -199,7 +199,7 @@
 							$("#btnLike").text("♡");
 						}
 
-						if (response.isAuth === true) {
+						if (response.auth === true || response.isAuth ===  true) {
 							let btnHtml = '<button onclick="location.href=\'/board/update?idx=' + idx +'\'">수정</button>' +
 												'<button onclick= "authDelete()">삭제</button>';
 							$("#authBtnArea").html(btnHtml);

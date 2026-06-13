@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>비밀번호 변경</title>
-	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<style>
 		body { width: 500px; margin: 0 auto; padding: 20px; }
 		label { display: inline-block; width: 130px; font-weight: bold;}
@@ -35,7 +35,7 @@
 
 	<script>
 				function changePw() {
-							var currentPw = $("#currentPw").val().trim();`
+							var currentPw = $("#currentPw").val().trim();
 							var newPw = $("#newPw").val().trim();
 							var newPwConfirm = $("#newPwConfirm").val().trim();
 
@@ -61,12 +61,14 @@
 								alert("비밀번호는 8~30자의 영문 대/소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
 								return;
 							}
-
 							$.ajax ({
 										  type: "post",
 										  url: "/member/updatePw",
-										  data: { "currentPw": currentPw, "newPw": newPw},
-										  success: function(result) {
+										  data: {
+												"currentPw": currentPw,
+												"newPw": newPw
+										},
+										success: function(result) {
 														if (result === "success") {
 															alert("비밀번호가 변경되었습니다.")
 															location.href = "/member/login";
@@ -74,7 +76,15 @@
 																		alert("현재 비밀번호가 일치하지 않습니다.")
 																		$("#currentPw").val("").focus()
 																		}
-														}
+														},
+										error: function(xhr) {
+											if (xhr.status === 401) {
+												alert("로그인 후 이용 가능합니다.");
+												location.href = "/member/login";
+												return;
+										}
+										alert("서버 통신 중 오류가 발생했습니다.");
+									}
 							})	;
 						}
 	</script>
