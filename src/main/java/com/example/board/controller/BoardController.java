@@ -132,7 +132,7 @@ public ResponseEntity<LikeResponseDTO> btnLike(@RequestParam("idx") Long idx,
 }
 
 @ResponseBody
-@GetMapping("board/likeUsers")
+@GetMapping("/board/likeUsers")
 public List<LikeUserDTO> likeUsers(@RequestParam("idx") Long idx) {
 	return boardService.findLikeUsers(idx);
 }

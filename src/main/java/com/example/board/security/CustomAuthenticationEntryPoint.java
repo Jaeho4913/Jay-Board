@@ -19,15 +19,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint{
 				AuthenticationException authException) throws IOException, ServletException {
 
 				String requestedWith = request.getHeader("X-Requseted-With");
-				String  uri = request.getRequestURI();
+				String accept = request.getHeader("Accept");
 
 				boolean isAjax = "XMLHttpRequest".equals(requestedWith)
-						|| uri.startsWith("/api/")
-						|| uri.contains("/reply")
-						|| uri.contains("/like")
-						|| uri.contains("/save")
-						|| uri.contains("/update")
-						|| uri.contains("/delete");
+						|| (accept != null && accept.contains("application/json"));
 
 				if(isAjax) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
