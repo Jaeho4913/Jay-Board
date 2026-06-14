@@ -20,6 +20,8 @@ public interface ReplyMapper {
     void  delete(@Param("replyIdx") Long replyIdx);
 
     void update(ReplyDTO replyDTO);
-    
-    
+
+    List<ReplyDTO> findRepliesPaging(ReplyDTO replyDTO);
+
+    int countByBoardIdx(Long boardIdx);
 }

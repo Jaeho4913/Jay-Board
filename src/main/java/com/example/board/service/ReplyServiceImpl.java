@@ -1,13 +1,12 @@
 package com.example.board.service;
 
-import java.net.ContentHandler;
 import java.util.List;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.board.dto.ReplyDTO;
-import com.example.board.mapper.BoardMapper;
+import com.example.board.dto.ReplyPageResponseDTO;
 import com.example.board.mapper.ReplyMapper;
 
 @Service
@@ -100,5 +99,51 @@ public class ReplyServiceImpl implements ReplyService{
 		replyDTO.setContent(content);
 
 		replyMapper.update(replyDTO);
+	}
+	@Override
+	public ReplyPageResponseDTO findRepliesPaging(ReplyDTO replyDTO) {
+
+		Long boardIdx = replyDTO.getBoardIdx();
+
+		if (boardIdx == null) {
+			throw new IllegalArgumentException("게시글 번호가 없습니다.");
+		}
+
+		Integer requestPage = replyDTO.getPage();
+		Integer requestSize = replyDTO.getSize();
+
+		int page;
+		if(requestPage == null) {
+			page = 1;
+		} else {
+			page = requestPage;
+		}
+
+		int size;
+		if(requestSize == null) {
+			size = 10;
+		} else {
+			size = requestSize;
+		}
+
+		if(page < 1) {
+			page = 1;
+		}
+
+		if(size < 1) {
+			size = 10;
+		}
+
+		int offset = (page - 1) * size;
+
+		replyDTO.setPage(page);
+		replyDTO.setSize(size);
+		replyDTO.setOffset(offset);
+
+		int totalCount = replyMapper.countByBoardIdx(boardIdx);
+
+		List<ReplyDTO> replyList = replyMapper.findRepliesPaging(replyDTO);
+
+		return new ReplyPageResponseDTO(page, size, totalCount, replyList);
 	}
 }

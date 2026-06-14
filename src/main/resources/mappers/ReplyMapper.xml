@@ -58,5 +58,26 @@
 			SET content=#{content}, updated_at=NOW()
 			WHERE reply_idx=#{replyIdx}
 		</update>
-	
+
+		<select id="countByBoardIdx" parameterType="long" resultType="int">
+			SELECT COUNT(*)
+			FROM tb_board_reply
+			WHERE board_idx=#{boardIdx}
+		</select>
+
+		<select id="findRepliesPaging" parameterType="com.example.board.dto.ReplyDTO" resultType="com.example.board.dto.ReplyDTO">
+			SELECT
+				r.reply_idx AS replyIdx,
+				r.board_idx AS boardIdx,
+				r.user_id AS userId,
+				m.user_name AS userName,
+				r.content AS content,
+				r.created_at AS createdAt,
+				r.updated_at AS updatedAt
+			FROM tb_board_reply r
+			LEFT JOIN members m ON r.user_id = m.user_id
+			WHERE r.board_idx = #{boardIdx}
+			ORDER BY r.reply_idx DESC
+			LIMIT #{size} OFFSET #{offset}
+		</select>
 </mapper>

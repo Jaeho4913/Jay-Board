@@ -7,7 +7,7 @@ import lombok.Data;
 public class PageResponseDTO {
 	private List<BoardDTO> boardList;
 	private SearchDTO searchDTO;
-	
+
 	private int totalCount;
 	private int totalPage;
 	private int startPage;
@@ -18,17 +18,17 @@ public class PageResponseDTO {
 		this.searchDTO = searchDTO;
 		this.totalCount = totalCount;
 		this.boardList = boardList;
-		
+
 		this.totalPage = (int)Math.ceil((double) totalCount / searchDTO.getSize());
-		
+
 		if (searchDTO.getPage() > totalPage && totalPage > 0) {
 			searchDTO.setPage(totalPage);
 		}
-		
+
 		this.startPage = ((searchDTO.getPage() - 1) / pageCount) * pageCount + 1;
-		
+
 		this.endPage = startPage + pageCount - 1;
-		
+
 		if (this.endPage > totalPage) {
 			this.endPage = totalPage;
 		}

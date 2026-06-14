@@ -118,6 +118,9 @@
 			const keyword = urlParams.get('keyword') || '';
 			const sortType = urlParams.get('sortType') || 'latest';
 
+			let replyPage = 1;
+			const replySize = 10;
+
 			function handleAuthAjaxError(xhr, message, loginMessage) {
 				if (xhr.status === 401) {
 					alert(loginMessage || "로그인 후 사용 가능합니다.");
@@ -238,11 +241,20 @@
 
 				return time.replace("T", " ").substring(0, 16);
 			}
-			function getReplyList() {
+			function getReplyList(page) {
+				if(!page) {
+					page = 1;
+				}
+				replyPage = page;
+
 				$.ajax({
 					type : "GET",
 					url : "/board/replies",
-					data : {boardIdx : idx},
+					data : {
+						boardIdx : idx,
+						page : replyPage,
+						size : replySize
+					},
 					dataType : "json",
 					success : function(res) {
 						if(res.status !== "success") {
@@ -269,8 +281,9 @@
 									html += '<div style="border-bottom:1px solid #eee; padding:10px 0;">';
 									html += '<div style="font-weight:bold;">' + reply.userName + '</div>';
 									html += '<div id="replyView_' + reply.replyIdx + '">';
-									html += '<div style="margin:5px 0;">' + reply.content + '</div>';
+									html += '<div style="margin:5px 0; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word;">' + reply.content + '</div>';
 									html += '<div style="font-size:12px; color:#777;">' + replyTime + '</div>';
+
 									if(reply.myReply === true) {
 										html += '<div style="margin-top:5px;">';
 										html += '	<button type="button" onclick="showReplyEdit(' + reply.replyIdx +')">수정</button>';
@@ -293,6 +306,8 @@
 									html += '</div>';
 								});
 						}
+						html += renderReplyPaging(res.page, res.startPage, res.endPage, res.totalPage);
+
 						$("#replyList").html(html);
 					},
 					error: function() {
@@ -334,7 +349,7 @@
 						if(res.status === "success"){
 							$("#replyContent").val("");
 							$("#replyLength").text("0");
-							getReplyList();
+							getReplyList(1);
 						}
 					},
 					error: function(xhr) {
@@ -364,7 +379,7 @@
 						}
 						if(res.status === "success"){
 							alert("댓글이 삭제되었습니다.");
-							getReplyList();
+							getReplyList(1);
 						}
 					},
 					error: function(xhr) {
@@ -381,7 +396,7 @@
 				$("#replyEditContent_" + replyIdx).focus();
 			}
 			function cancelReplyEdit(replyIdx){
-				getReplyList();
+				getReplyList(replyPage);
 			}
 			function updateReply(replyIdx){
 				let content = $("#replyEditContent_" + replyIdx).val();
@@ -417,7 +432,7 @@
 						}
 						if(res.status === "success"){
 							alert("댓글이 수정되었습니다.");
-							getReplyList();
+							getReplyList(replyPage);
 						}
 					},
 					error: function(xhr) {
@@ -425,6 +440,34 @@
 					}
 				});
 			}
+
+			function renderReplyPaging(page, startPage, endPage, totalPage) {
+				if (!totalPage || totalPage <= 1) {
+					return "";
+				}
+				let html = '<div style="margin-top:15px; text-align:center;">';
+
+				if(page > 1) {
+					html += '<button type="button" onclick="getReplyList(' + (page-1) + ')">이전</button> ';
+				}
+
+				for (let i = startPage; i <= endPage; i++) {
+					if (i === page) {
+						html += '<button type="button" disabled style="font-weight:bold;">' + i + '</button>';
+					} else {
+						html += '<button type="button" onclick="getReplyList(' + i + ')">' + i + '</button>';
+					}
+				}
+
+				if(page < totalPage) {
+					html += '<button type="button" onclick="getReplyList(' + (page+1) + ')">다음</button> ';
+				}
+
+				html += '</div>';
+
+				return html;
+			}
+
 			function authDelete() {
 				if(!confirm("정말 삭제하시겠습니까?")) return;
 

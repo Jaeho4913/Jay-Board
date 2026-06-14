@@ -38,7 +38,4 @@ public interface BoardMapper {
     void delete(Long idx);
 
     void updateViewCnt(Long idx);
-
-
-
 }

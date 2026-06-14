@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.board.dto.ReplyDTO;
+import com.example.board.dto.ReplyPageResponseDTO;
 import com.example.board.service.ReplyService;
 
 
@@ -39,7 +40,8 @@ public class ReplyController {
 			resultMap.put("message", "해당 게시글이 없습니다.");
 			return ResponseEntity.ok(resultMap);
 		}
-		List<ReplyDTO>replyList = replyService.findAllByBoardIdx(boardIdx);
+		ReplyPageResponseDTO pageResult =  replyService.findRepliesPaging(replyDTO);
+		List<ReplyDTO>replyList = pageResult.getReplyList();
 
 		if (authentication != null && authentication.getName() !=null) {
 			String loginUserId = authentication.getName();
@@ -50,6 +52,14 @@ public class ReplyController {
 		}
 		resultMap.put("status", "success");
 		resultMap.put("replyData", replyList);
+
+		resultMap.put("page", pageResult.getPage());
+		resultMap.put("size", pageResult.getSize());
+		resultMap.put("totalCount", pageResult.getTotalCount());
+		resultMap.put("totalPage", pageResult.getTotalPage());
+		resultMap.put("startPage", pageResult.getStartPage());
+		resultMap.put("endPage", pageResult.getEndPage());
+
 		return ResponseEntity.ok(resultMap);
 	}
 	@ResponseBody

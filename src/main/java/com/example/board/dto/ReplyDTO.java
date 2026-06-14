@@ -14,4 +14,7 @@ public class ReplyDTO {
 	    private LocalDateTime createdAt;
 	    private LocalDateTime updatedAt;
 	    private boolean myReply;
+	    private Integer page = 1;
+	    private Integer size = 1;
+	    private Integer offset;
 }
