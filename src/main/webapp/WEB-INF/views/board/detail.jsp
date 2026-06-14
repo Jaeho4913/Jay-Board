@@ -6,11 +6,35 @@
 		<meta charset="UTF-8">
 		<title>상세 보기</title>
 		<style>
-			body{width: 800px; margin: 0 auto; padding 20px;}
-			table{width: 100%; border-collapse: collapse; margin-bottom: 20px;}
-			th, td{border: 1px solid #ddd; padding:15px;}
-			th{background-color: #f2f2f2; width: 100px;}
-			.btn-area{padding: 10px 20px; cursor: pointer;}
+			body{
+				width: 800px;
+				margin: 0 auto;
+				padding: 20px;
+			}
+			table{
+				width: 100%;
+				border-collapse: collapse;
+				margin-bottom: 20px;
+				table-layout: fixed;
+			}
+			th, td{
+				border: 1px solid #ddd;
+				padding:15px;
+			}
+			th{
+				background-color: #f2f2f2;
+				width: 100px;
+			}
+			#v_content{
+				white-space: pre-wrap;
+				overflow-wrap: anywhere;
+				word-break: break-word;
+				line-height: 1.6;
+			}
+			.btn-area{
+				padding: 10px 20px;
+				cursor: pointer;
+			}
 		</style>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	</head>
@@ -46,7 +70,6 @@
 				<td id="v_content" style="height: 200px; vertical-align: top;">로딩중...</td>
 			</tr>
 		</table>
-
 		<div id="replyArea" style="margin-top:30px; border-top:1px solid #ddd; padding-top:20px;">
 
 			<h3>댓글</h3>
