@@ -6,6 +6,7 @@ import java.util.List;
 import com.example.board.dto.BoardDTO;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.dto.LikeUserDTO;
+import com.example.board.dto.MemberDTO;
 import com.example.board.dto.PageResponseDTO;
 import com.example.board.dto.SearchDTO;
 
@@ -22,4 +23,6 @@ public interface BoardService {
 	int countLike(Long idx);
 	int existsLike(Long idx, String userId);
 	List<LikeUserDTO> findLikeUsers(Long idx);
+	int countLikeUsers(Long idx);
+	List<MemberDTO> findLikeUsersPaging(Long idx, int size, int offset);
 }

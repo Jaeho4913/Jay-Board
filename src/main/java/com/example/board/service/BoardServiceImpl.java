@@ -89,7 +89,14 @@ public class BoardServiceImpl implements BoardService {
 	public List<LikeUserDTO> findLikeUsers(Long idx) {
 		return boardMapper.findLikeUsers(idx);
 	}
-
+	@Override
+	public int countLikeUsers(Long idx) {
+		return boardMapper.countLikeUsers(idx);
+	}
+	@Override
+	public List<MemberDTO> findLikeUsersPaging(Long idx, int size, int offset){
+		return boardMapper.findLikeUsersPaging(idx, size, offset);
+	}
 	@Override
 	public void save(BoardDTO boardDTO) {
 		boardMapper.save(boardDTO);

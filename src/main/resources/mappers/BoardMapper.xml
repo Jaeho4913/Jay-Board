@@ -108,6 +108,23 @@
 			ORDER BY bl.created_at DESC
 	</select>
 
+	<select id="countLikeUsers" resultType="int">
+		SELECT COUNT(*)
+		FROM tb_board_like
+		where board_idx = #{idx}
+	</select>
+
+	<select id="findLikeUsersPaging" resultType="com.example.board.dto.MemberDTO">
+		SELECT
+			m.user_id AS userId,
+			m.user_name AS userName
+		FROM tb_board_like AS bl
+		INNER JOIN members m ON bl.user_id = m.user_id
+		WHERE bl.board_idx = #{idx}
+		ORDER BY bl.created_at DESC
+		LIMIT #{size} OFFSET #{offset}
+	</select>
+
 	<insert id="save" parameterType="com.example.board.dto.BoardDTO">
 			INSERT INTO tb_board (title, content, writer, user_id,  board_pw, view_cnt, created_at, updated_at)
 			Values (#{title}, #{content}, #{writer}, #{userId}, #{boardPw}, 0, NOW(), NOW())

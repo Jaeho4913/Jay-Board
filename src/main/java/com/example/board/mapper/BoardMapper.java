@@ -1,9 +1,8 @@
 package com.example.board.mapper; // (패키지명은 작성자님꺼 그대로 두세요)
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
-import org.apache.ibatis.annotations.Param; // 👈 ★ 이거 중요! (임포트 필수)
+import org.apache.ibatis.annotations.Param;
 
 import com.example.board.dto.BoardDTO;
 import com.example.board.dto.LikeUserDTO;
@@ -22,8 +21,14 @@ public interface BoardMapper {
     int existsLike(@Param("idx") Long idx, @Param("userId") String userId);
     int insertLike(@Param("idx") Long idx, @Param("userId") String userId);
     int deleteLike(@Param("idx") Long idx, @Param("userId") String userId);
+    int countLikeUsers(@Param("idx") Long idx);
 
     List<LikeUserDTO> findLikeUsers(Long idx);
+    List<MemberDTO> findLikeUsersPaging(
+    		@Param("idx") Long idx,
+    		@Param("size") int size,
+    		@Param("offset") int offset
+    );
 
     // 2. 글 저장
     void save(BoardDTO boardDTO);

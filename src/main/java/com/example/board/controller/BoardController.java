@@ -133,8 +133,40 @@ public ResponseEntity<LikeResponseDTO> btnLike(@RequestParam("idx") Long idx,
 
 @ResponseBody
 @GetMapping("/board/likeUsers")
-public List<LikeUserDTO> likeUsers(@RequestParam("idx") Long idx) {
-	return boardService.findLikeUsers(idx);
+public Map<String, Object> likeUsers(
+		@RequestParam("idx") Long idx,
+		@RequestParam(value = "page", defaultValue = "1") int page,
+		@RequestParam(value = "size", defaultValue = "10") int size) {
+	Map<String, Object> resultMap = new HashMap<>();
+
+	if(idx == null) {
+		resultMap.put("status", "fail");
+		resultMap.put("message", "게시글 번호가 없습니다");
+		return resultMap;
+	}
+	if(page < 1) {
+		page = 1;
+	}
+	if(size < 10) {
+		size = 10;
+	}
+	int totalCount=boardService.countLikeUsers(idx);
+	int totalPage = (int)Math.ceil((double)totalCount / page);
+
+	if(totalPage > 0 && page > totalPage) {
+		page = totalPage;
+	}
+	int offset = (page - 1) * size;
+	List<MemberDTO> likeUsers = boardService.findLikeUsersPaging(idx, size, offset);
+
+	resultMap.put("status", "success");
+	resultMap.put("likeUsers", likeUsers);
+	resultMap.put("page", page);
+	resultMap.put("size", size);
+	resultMap.put("totalCount", totalCount);
+	resultMap.put("totalPage", totalPage);
+
+	return resultMap;
 }
 
 @ResponseBody

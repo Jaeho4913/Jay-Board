@@ -101,7 +101,7 @@
 			    border-radius:10px;
 			 ">
 				<h3>좋아요 한 사람</h3>
-				<div id="likeModalBody"></div>
+				<div id="likeModalBody" style = "padding-right:8px;"></div>
 				<br>
 				<button type="button" id="btnCloseLikeModal">닫기</button>
 			</div>
@@ -120,6 +120,11 @@
 
 			let replyPage = 1;
 			const replySize = 10;
+
+			let likePage = 1;
+			const likeSize = 10;
+			let likeLoading = false;
+			let likeEnd = false;
 
 			function handleAuthAjaxError(xhr, message, loginMessage) {
 				if (xhr.status === 401) {
@@ -145,6 +150,21 @@
 				$("#btnList").on("click", function(){
 					location.href = '/?page=' + page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
 				});
+
+				$("#likeModalBody").on("scroll", function(){
+					let scrollTop = $(this).scrollTop();
+					let innerHeight = $(this).innerHeight();
+					let scrollHeight = this.scrollHeight;
+
+					if(scrollTop + innerHeight >= scrollHeight - 10) {
+						if(!likeLoading && !likeEnd) {
+							likePage++;
+							getLikeUsersScroll();
+						}
+					}
+				});
+
+			});
 
 				$("#btnLike").on("click", function() {
 					$.ajax({
@@ -177,32 +197,19 @@
 					});
 				});
 				$("#v_likeCnt").on("click", function(){
-					$.ajax({
-						type: "GET",
-						url: "/board/likeUsers",
-						data: {idx: idx},
-						dataType: "json",
-						success: function(users){
-							let html = "";
+					likePage = 1;
+					likeLoading = false;
+					likeEnd = false;
 
-							if (!users || users.length ===0) {
-								html = "<div>공감한 사용자가 없습니다.</div>";
-							} else {
-								users.forEach(function(user) {
-									html += "<div>"
-										+ user.userName
-										+ " (" + user.userId + ")"
-										+"</div>";
-								});
-							}
-							$("#likeModalBody").html(html);
-							$("#likeModal").show();
-						},
-						error: function() {
-							alert("공감 목록을 불러오지 못했습니다.");
-						}
-					});
-				});
+					$("#likeModalBody")
+						.empty()
+						.css({
+							"max-height" : "none",
+							"overflow-y" : "hidden"
+						});
+						$("#likeModal").show();
+
+						getLikeUsersScroll();
 			});
 
 			function getDetail() {
@@ -236,6 +243,69 @@
 					}
 				});
 			}
+			function getLikeUsersScroll() {
+				if(likeLoading || likeEnd){
+					return;
+				}
+				likeLoading = true;
+
+				$.ajax({
+					type : "GET",
+					url : "/board/likeUsers",
+					data : {
+						idx : idx,
+						page : likePage,
+						size : likeSize
+					},
+					dataType : "json",
+					success : function(res) {
+						if(res.status !== "success") {
+							$("#likeModalBody").append("<div>공감 목록을 불러오지 못했습니다.</div>");
+							return;
+						}
+						let users = res.likeUsers;
+
+						if (likePage === 1) {
+							if(res.totalCount > likeSize){
+								$("#likeModalBody").css({
+									"max-height" : "400px",
+									"overflow-y" : "auto"
+								});
+							} else {
+								$("#likeModalBody").css({
+									"max-height" : "none",
+									"overflow-y" : "hidden"
+								});
+							}
+						}
+						if(!users || users.length === 0) {
+							if(likePage === 1) {
+								$("#likeModalBody").append("<div>공감한 사용자가 없습니다.</div>");
+							}
+							likeEnd = true;
+							return;
+						}
+						let html = "";
+
+						users.forEach(function(user){
+							html +=  "<div style='height:42px; line-height:42px; border-bottom:1px solid #eee;'>";
+							html += user.userName + "(" + user.userId + ")";
+							html += "</div>";
+						});
+						$("#likeModalBody").append(html);
+						if (likePage >= res.totalPage || users.length < likeSize) {
+							likeEnd = true;
+						}
+					},
+					error : function() {
+						alert("공감 목록을 불러오지 못했습니다.");
+					},
+					complete : function() {
+						likeLoading = false;
+					}
+				});
+			}
+
 			function formatReplyTime(time) {
 				if(!time) return "";
 
