@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.mapper.AdminMemberMapper">
+
+	<select id="findByAdminId" resultType="com.example.board.dto.AdminMemberDTO">
+		SELECT
+			admin_idx AS adminIdx,
+			admin_id AS adminId,
+			password,
+			admin_name AS adminName,
+			admin_role AS adminRole,
+			admin_status AS adminStatus,
+			last_login_at AS lastLoginAt,
+			created_at AS createdAt,
+			updated_at AS updatedAt
+		FROM tb_admin_member
+		WHERE admin_id = #{adminId}
+	</select>
+
+</mapper>
