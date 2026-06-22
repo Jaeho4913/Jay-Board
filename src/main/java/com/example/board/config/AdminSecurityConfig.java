@@ -19,8 +19,7 @@ public class AdminSecurityConfig {
 	private final AdminUserDetailsService adminUserDetailsService;
 	private final PasswordEncoder passwordEncoder;
 
-	@Bean
-	public DaoAuthenticationProvider adminAuthenticationProvider() {
+	private DaoAuthenticationProvider adminAuthenticationProvider() {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider(adminUserDetailsService);
 		provider.setPasswordEncoder(passwordEncoder);
 		return provider;
