@@ -7,16 +7,17 @@
 	<select id="findAll" resultType="com.example.board.dto.BoardDTO">
 		SELECT
 			b.*,
-			COALESCE(l.like_cnt, 0) AS likeCnt,
-				(SELECT COUNT(*)
+			(
+				SELECT COUNT(*)
+				FROM tb_board_like l
+				WHERE l.board_idx = b.idx
+			) AS likeCnt,
+			(
+				SELECT COUNT(*)
 				FROM tb_board_reply r
-				WHERE r.board_idx = b.idx) AS replyCnt
-			FROM tb_board b
-			LEFT JOIN (
-				SELECT board_idx, COUNT(*) AS like_cnt
-				FROM tb_board_like
-				GROUP BY board_idx
-				) l ON b.idx = l.board_idx
+				WHERE r.board_idx = b.idx
+			) AS replyCnt
+		FROM tb_board b
 		<where>
 			<if test="keyword != null and keyword != ''">
 				<choose>
@@ -51,11 +52,11 @@
 			</when>
 
 			<when test = "sortType == 'likeDesc'">
-				ORDER BY COALESCE(l.like_cnt, 0) DESC, b.created_at DESC, b.idx DESC
+				ORDER BY likeCnt DESC, b.created_at DESC, b.idx DESC
 			</when>
 
 			<when test = "sortType == 'likeAsc'">
-				ORDER BY COALESCE(l.like_cnt, 0) ASC, b.created_at DESC, b.idx DESC
+				ORDER BY likeCnt ASC, b.created_at DESC, b.idx DESC
 			</when>
 
 			<when test = "sortType == 'replyDesc'">
