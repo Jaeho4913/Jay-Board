@@ -2,6 +2,7 @@ package com.example.board.controller;
 
 import java.util.Map;
 
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.board.dto.BoardDTO;
 import com.example.board.dto.ReplyDTO;
 import com.example.board.dto.ReplyPageResponseDTO;
+import com.example.board.service.BoardService;
 import com.example.board.service.ReplyService;
 
 
@@ -25,6 +28,9 @@ public class ReplyController {
 
 	@Autowired
 	private ReplyService replyService;
+	
+	@Autowired
+	private BoardService boardService;
 
 	@ResponseBody
 	@GetMapping("/board/replies")
@@ -38,8 +44,18 @@ public class ReplyController {
 		if(boardIdx == null) {
 			resultMap.put("status", "fail");
 			resultMap.put("message", "해당 게시글이 없습니다.");
-			return ResponseEntity.ok(resultMap);
+			return ResponseEntity.status(404).body(resultMap);
 		}
+		
+		BoardDTO boardResult = boardService.findById(boardIdx);
+		
+		if (boardResult == null) {
+			resultMap.put("status", "fail");
+			resultMap.put("message", "해당 게시글을 조회할 수 없습니다.");
+			return ResponseEntity.status(404).body(resultMap);
+		}
+		
+		
 		ReplyPageResponseDTO pageResult =  replyService.findRepliesPaging(replyDTO);
 		List<ReplyDTO>replyList = pageResult.getReplyList();
 

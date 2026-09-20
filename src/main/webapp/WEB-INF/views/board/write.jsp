@@ -50,7 +50,7 @@
 					<button type="button" onclick="saveBoard()"
 						style="background-color: #007bff; color: white; border: none;">등록</button>
 					<button type="button"
-						onclick="location.href='/?page=${searchDTO.page}&searchType=${searchDTO.searchType}&keyword=${searchDTO.keyword}'">취소</button>
+						onclick="location.href='/?page=${searchDTO.page}&searchType=${searchDTO.searchType}&keyword=${searchDTO.keyword}&boardGroupIdx=${boardGroupIdx}'">취소</button>
 				</div>
 			</div>
 
@@ -90,7 +90,7 @@
 						success: function (result) {
 							if (result === "success") {
 								alert("게시글이 성공적으로 등록되었습니다!")
-								location.href = "/";
+								location.href = "/board/list?boardGroupIdx=" + $("#boardGroupIdx").val();
 							} else if (result === "loginRequired") {
 								alert("로그인 후 작성 가능합니다.");
 								location.href = "/member/login";

@@ -20,6 +20,7 @@ import com.example.board.dto.LikeResponseDTO;
 import com.example.board.dto.LikeUserDTO;
 import com.example.board.dto.SearchDTO;
 import com.example.board.security.CustomUserDetails;
+import com.example.board.service.BoardGroupService;
 import com.example.board.service.BoardService;
 import com.example.board.dto.MemberDTO;
 
@@ -29,18 +30,23 @@ public class BoardController {
 	@Autowired
 	private BoardService boardService;
 
+	@Autowired
+	private BoardGroupService boardGroupService;
+
 	private boolean isLogin(Authentication authentication) {
 		return authentication != null && authentication.isAuthenticated()
 				&& authentication.getPrincipal() instanceof CustomUserDetails;
 	}
 
 	@GetMapping("/")
-	public String home() {
+	public String home(Model model) {
+		model.addAttribute("boardGroups", boardGroupService.getActiveBoardGroups());
 		return "board/home";
 	}
 
 	@GetMapping("/board/list")
-	public String boardList() {
+	public String boardList(Model model) {
+		model.addAttribute("boardGroups", boardGroupService.getActiveBoardGroups());
 		return "board/home";
 	}
 
@@ -66,12 +72,17 @@ public class BoardController {
 	@ResponseBody
 	@GetMapping("/board/getDetail")
 	public ResponseEntity<BoardDTO> getBoardDetail(@RequestParam("idx") Long idx, Authentication authentication) {
-		boardService.updateViewCnt(idx);
+		
 		BoardDTO board = boardService.findById(idx);
 
 		if (board == null) {
 			return ResponseEntity.notFound().build();
 		}
+		boardService.updateViewCnt(idx);
+		
+		int viewCnt = board.getViewCnt(); 
+		board.setViewCnt(viewCnt + 1);
+		
 		int likeCnt = boardService.countLike(idx);
 		board.setLikeCnt(likeCnt);
 
@@ -97,8 +108,13 @@ public class BoardController {
 	public ResponseEntity<Map<String, Object>> getBoardList(@ModelAttribute SearchDTO searchDTO,
 			Authentication authentication) {
 		Map<String, Object> result = new HashMap<>();
-		result.put("boardData", boardService.findAll(searchDTO));
 
+		try {
+			result.put("boardData", boardService.findAll(searchDTO));
+		} catch (IllegalArgumentException ex) {
+			result.put("message", ex.getMessage());
+			return ResponseEntity.badRequest().body(result);
+		}
 		if (isLogin(authentication)) {
 			CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 			MemberDTO member = userDetails.getMemberDTO();
