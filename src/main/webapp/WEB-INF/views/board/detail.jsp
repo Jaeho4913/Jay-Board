@@ -571,7 +571,7 @@
 						if (!confirm("정말 삭제하시겠습니까?")) return;
 
 						$.ajax({
-							type: "GET",
+							type: "POST",
 							url: "/board/delete",
 							data: {idx: idx},
 							success: function (result) {

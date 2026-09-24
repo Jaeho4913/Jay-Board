@@ -244,7 +244,7 @@ public class BoardController {
 	}
 
 	@ResponseBody
-	@GetMapping("/board/delete")
+	@PostMapping("/board/delete")
 	public ResponseEntity<String> delete(@RequestParam("idx") Long idx, Authentication authentication) {
 
 		if (!isLogin(authentication)) {
