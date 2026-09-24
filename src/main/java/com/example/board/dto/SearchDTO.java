@@ -40,4 +40,6 @@ public class SearchDTO {
 			return "latest";
 		return sortType;
 	}
+	
+	private Integer boardGroupIdx;
 }

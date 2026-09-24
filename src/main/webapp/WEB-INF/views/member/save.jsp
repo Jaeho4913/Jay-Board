@@ -1,147 +1,150 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+	<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="UTF-8">
-		<title>회원가입 페이지</title>
-		<script  src="http://code.jquery.com/jquery-latest.min.js"></script>
-	</head>
-	<body>
+		<!DOCTYPE html>
+		<html>
 
-		<h2>회원가입</h2>
+		<head>
+			<meta charset="UTF-8">
+			<title>회원가입 페이지</title>
+			<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+		</head>
 
-		<form action="/member/save" method="post" id="saveForm" onsubmit="return joinCheck()">
+		<body>
 
-			<p>
-				<label>아이디 :</label>
-				<input type="text" name="userId" id="userId" maxlength="50" data-check-result="fail" placeholder="아이디를 입력하세요">
-				<button type="button" onclick="checkId()">중복검사</button>
-			</p>
+			<h2>회원가입</h2>
 
-			<p>
-				<label>비밀번호 :</label>
-				<input type="password" name="password" id="password" maxlength="255" placeholder="비밀번호를 입력하세요">
-			</p>
+			<form action="/member/save" method="post" id="saveForm" onsubmit="return joinCheck()">
 
-			<p>
-				<label>이름 :</label>
-				<input type="text" name="userName" id="userName" maxlength="50" placeholder ="이름을 입력하세요">
-			</p>
+				<p>
+					<label>아이디 :</label>
+					<input type="text" name="userId" id="userId" maxlength="50" data-check-result="fail"
+						placeholder="아이디를 입력하세요">
+					<button type="button" onclick="checkId()">중복검사</button>
+				</p>
 
-			<p>
-				<label>이메일 :</label>
-				<input type="text" name="email" id="email" maxlength="100"  placeholder="이메일을 입력하세요">
-			</p>
+				<p>
+					<label>비밀번호 :</label>
+					<input type="password" name="password" id="password" maxlength="255" placeholder="비밀번호를 입력하세요">
+				</p>
 
-			<button type="submit">가입하기</button>
-		<c:if test="${not empty errorMessage}">
+				<p>
+					<label>이름 :</label>
+					<input type="text" name="userName" id="userName" maxlength="50" placeholder="이름을 입력하세요">
+				</p>
+
+				<p>
+					<label>이메일 :</label>
+					<input type="text" name="email" id="email" maxlength="100" placeholder="이메일을 입력하세요">
+				</p>
+
+				<button type="submit">가입하기</button>
+				<c:if test="${not empty errorMessage}">
+					<script>
+						alert("${errorMessage}");
+					</script>
+				</c:if>
+			</form>
+
+
+			<!--		<button id="save">테스트</button>-->
+			<hr>
+			<a href="/member/login">이미 아이디가 있다면? 로그인하러 가기</a>
 			<script>
-					alert("${errorMessage}");
-			</script>
-		</c:if>
-		</form>
-
-
-<!--		<button id="save">테스트</button>-->
-		<hr>
-		<a href="/member/login">이미 아이디가 있다면? 로그인하러 가기</a>
-		<script>
-			$(document).ready(function() {
-				$("#userId").on("input", function() {
-					$(this).attr("data-check-result", "fail");
+				$(document).ready(function () {
+					$("#userId").on("input", function () {
+						$(this).attr("data-check-result", "fail");
+					});
 				});
-			});
-			function checkId() {
+				function checkId() {
 
-				var userId = $("#userId").val().trim();
+					var userId = $("#userId").val().trim();
 
-				if (userId == "") {
-					alert("아이디를 입력해주세요");
-					$("#userId").focus();
-					return;
-				}
-
-				var idReg = /^[a-zA-Z0-9]{8,40}$/;
-
-				if (!idReg.test(userId)) {
-					alert("아이디는 영문/숫자만 가능하며 8~40자여야 합니다.");
-					$("#userId").focus();
-					return;
-				}
-
-				$.ajax({
-					type: "get",
-					url: "/member/checkId/" + encodeURIComponent(userId),
-					dataType: "text",
-					cache: false,
-
-					success: function(result) {
-
-						if (result != "existID") {
-							alert("사용 가능한 아이디입니다.");
-							$("#userId").attr("data-check-result", "success");
-
-						} else {
-							alert("이미 사용 중인 아이디입니다.");
-
-							$("#userId").attr("data-check-result", "fail");
-
-							$("#userId").val("").focus();
-						}
+					if (userId == "") {
+						alert("아이디를 입력해주세요");
+						$("#userId").focus();
+						return;
 					}
-				});
-			}
-			function joinCheck() {
 
-				if ($("#userId").attr("data-check-result") == "fail") {
-					alert("아이디 중복 검사를 해주세요.");
-					$("#userId").focus();
-					return false;
+					var idReg = /^[a-zA-Z0-9]{8,40}$/;
+
+					if (!idReg.test(userId)) {
+						alert("아이디는 영문/숫자만 가능하며 8~40자여야 합니다.");
+						$("#userId").focus();
+						return;
+					}
+
+					$.ajax({
+						type: "get",
+						url: "/member/checkId/" + encodeURIComponent(userId),
+						dataType: "text",
+						cache: false,
+
+						success: function (result) {
+
+							if (result != "existID") {
+								alert("사용 가능한 아이디입니다.");
+								$("#userId").attr("data-check-result", "success");
+
+							} else {
+								alert("이미 사용 중인 아이디입니다.");
+
+								$("#userId").attr("data-check-result", "fail");
+
+								$("#userId").val("").focus();
+							}
+						}
+					});
 				}
-				var password = $("#password").val().trim();
-				var passwordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,30}$/;
+				function joinCheck() {
 
-				if (!passwordReg.test(password)) {
-					alert("비밀번호는 8~30자의 영문 대/소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
-					$("#password").val("").focus();
-					return false;
+					if ($("#userId").attr("data-check-result") == "fail") {
+						alert("아이디 중복 검사를 해주세요.");
+						$("#userId").focus();
+						return false;
+					}
+					var password = $("#password").val().trim();
+					var passwordReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,30}$/;
+
+					if (!passwordReg.test(password)) {
+						alert("비밀번호는 8~30자의 영문 대/소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
+						$("#password").val("").focus();
+						return false;
+					}
+					var userName = $("#userName").val().trim();
+					var userNameReg = /^[가-힣a-zA-Z]{1,50}$/;
+
+					if (userName == "") {
+						alert("이름을 입력해주세요.");
+						$("#userName").focus();
+						return false;
+					}
+					if (!userNameReg.test(userName)) {
+						alert("이름에는 숫자나 특수문자 입력이 불가합니다.");
+						$("#userName").val("").focus();
+						return false;
+					}
+					var email = $("#email").val().trim();
+					var emailReg = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+					if (email == "") {
+						alert("이메일을 입력해주세요.");
+						$("#email").focus();
+						return false;
+					}
+
+					if (!emailReg.test(email)) {
+						alert("올바른 이메일 형식이 아닙니다.");
+						$("#email").focus();
+						return false;
+					}
+					return true;
 				}
-				var userName = $("#userName").val().trim();
-				var userNameReg = /^[가-힣a-zA-Z]{1,50}$/;
-
-				if (userName == "") {
-					alert("이름을 입력해주세요.");
-					$("#userName").focus();
-					return false;
-				}
-				if (!userNameReg.test(userName)) {
-					alert("이름에는 숫자나 특수문자 입력이 불가합니다.");
-					$("#userName").val("").focus();
-					return false;
-				}
-				var email = $("#email").val().trim();
-				var emailReg = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-				if (email == "") {
-					alert("이메일을 입력해주세요.");
-					$("#email").focus();
-					return false;
-				}
-
-				if (!emailReg.test(email)) {
-					alert("올바른 이메일 형식이 아닙니다.");
-					$("#email").focus();
-					return false;
-				}
-				return true;
-			}
-		//var name = $("#userName").val();
-		//$("input[name=userName]").val();
+				//var name = $("#userName").val();
+				//$("input[name=userName]").val();
 
 
-		</script>
-	</body>
-</html>
+			</script>
+		</body>
 
+		</html>

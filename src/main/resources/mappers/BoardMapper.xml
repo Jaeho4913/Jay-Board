@@ -6,19 +6,25 @@
 
 	<select id="findAll" resultType="com.example.board.dto.BoardDTO">
 		SELECT
-			b.*,
-			(
-				SELECT COUNT(*)
-				FROM tb_board_like l
-				WHERE l.board_idx = b.idx
-			) AS likeCnt,
-			(
-				SELECT COUNT(*)
-				FROM tb_board_reply r
-				WHERE r.board_idx = b.idx
-			) AS replyCnt
+		b.*,
+		(
+		SELECT COUNT(*)
+		FROM tb_board_like l
+		WHERE l.board_idx =
+		b.idx
+		) AS likeCnt,
+		(
+		SELECT COUNT(*)
+		FROM tb_board_reply r
+		WHERE
+		r.board_idx = b.idx
+		) AS replyCnt
 		FROM tb_board b
+		JOIN tb_board_group g
+		ON b.board_group_idx = g.board_group_idx
 		<where>
+			g.is_active = 1
+
 			<if test="keyword != null and keyword != ''">
 				<choose>
 					<when test="searchType == 'title'">
@@ -32,39 +38,45 @@
 					</when>
 				</choose>
 			</if>
+
+			<if test="boardGroupIdx != null">
+				AND b.board_group_idx = #{boardGroupIdx}
+			</if>
 		</where>
 
 		<choose>
-			<when test= "sortType == 'latest'">
-				ORDER  BY b.created_at DESC, b.idx DESC
+			<when test="sortType == 'latest'">
+				ORDER BY b.created_at DESC, b.idx DESC
 			</when>
 
-			<when test = "sortType == 'oldest'">
+			<when test="sortType == 'oldest'">
 				ORDER BY b.created_at ASC, b.idx ASC
 			</when>
 
-			<when test = "sortType == 'viewDesc'">
-				ORDER BY b.view_cnt DESC, b.created_at DESC, b.idx DESC
+			<when test="sortType == 'viewDesc'">
+				ORDER BY b.view_cnt DESC, b.created_at DESC, b.idx
+				DESC
 			</when>
 
-			<when test = "sortType == 'viewAsc'">
-				ORDER BY b.view_cnt ASC, b.created_at DESC, b.idx DESC
+			<when test="sortType == 'viewAsc'">
+				ORDER BY b.view_cnt ASC, b.created_at DESC, b.idx
+				DESC
 			</when>
 
-			<when test = "sortType == 'likeDesc'">
+			<when test="sortType == 'likeDesc'">
 				ORDER BY likeCnt DESC, b.created_at DESC, b.idx DESC
 			</when>
 
-			<when test = "sortType == 'likeAsc'">
+			<when test="sortType == 'likeAsc'">
 				ORDER BY likeCnt ASC, b.created_at DESC, b.idx DESC
 			</when>
 
-			<when test = "sortType == 'replyDesc'">
-				ORDER BY replyCnt Desc,  b.created_at DESC, b.idx DESC
+			<when test="sortType == 'replyDesc'">
+				ORDER BY replyCnt Desc, b.created_at DESC, b.idx DESC
 			</when>
 
-			<when test = "sortType == 'replyAsc'">
-				ORDER BY replyCnt Asc,  b.created_at DESC, b.idx DESC
+			<when test="sortType == 'replyAsc'">
+				ORDER BY replyCnt Asc, b.created_at DESC, b.idx DESC
 			</when>
 
 
@@ -77,98 +89,130 @@
 	</select>
 
 	<select id="countLike" resultType="int">
-		SELECT COUNT(*) FROM tb_board_like
-			WHERE board_idx = #{idx}
+		SELECT COUNT(*) FROM
+		tb_board_like
+		WHERE board_idx = #{idx}
 	</select>
 
 	<select id="existsLike" resultType="int">
-		SELECT COUNT(*) FROM tb_board_like
-			WHERE board_idx = #{idx}
-				AND user_id = #{userId}
+		SELECT COUNT(*) FROM
+		tb_board_like
+		WHERE board_idx = #{idx}
+		AND user_id = #{userId}
 	</select>
 
 	<insert id="insertLike">
-		INSERT INTO tb_board_like  (board_idx, user_id)
-		VALUES (#{idx}, #{userId})
+		INSERT INTO tb_board_like (board_idx, user_id)
+		VALUES
+		(#{idx}, #{userId})
 	</insert>
 
 	<delete id="deleteLike">
-		DELETE	FROM tb_board_like
-			WHERE board_idx = #{idx}
-				AND user_id = #{userId}
+		DELETE FROM tb_board_like
+		WHERE board_idx = #{idx}
+		AND
+		user_id = #{userId}
 	</delete>
 
-	<select id="findLikeUsers" resultType="com.example.board.dto.LikeUserDTO">
+	<select id="findLikeUsers"
+		resultType="com.example.board.dto.LikeUserDTO">
 		SELECT
-			m.user_id AS userId,
-			m.user_name AS userName
-			FROM tb_board_like bl
-			INNER JOIN members m
-				ON bl.user_id = m.user_id
-			WHERE bl.board_idx = #{idx}
-			ORDER BY bl.created_at DESC
+		m.user_id AS userId,
+		m.user_name AS userName
+		FROM
+		tb_board_like bl
+		INNER JOIN members m
+		ON bl.user_id = m.user_id
+		WHERE
+		bl.board_idx = #{idx}
+		ORDER BY bl.created_at DESC
 	</select>
 
 	<select id="countLikeUsers" resultType="int">
 		SELECT COUNT(*)
-		FROM tb_board_like
+		FROM
+		tb_board_like
 		where board_idx = #{idx}
 	</select>
 
-	<select id="findLikeUsersPaging" resultType="com.example.board.dto.MemberDTO">
+	<select id="findLikeUsersPaging"
+		resultType="com.example.board.dto.MemberDTO">
 		SELECT
-			m.user_id AS userId,
-			m.user_name AS userName
-		FROM tb_board_like AS bl
-		INNER JOIN members m ON bl.user_id = m.user_id
-		WHERE bl.board_idx = #{idx}
+		m.user_id AS userId,
+		m.user_name AS userName
+		FROM
+		tb_board_like AS bl
+		INNER JOIN members m ON bl.user_id
+		= m.user_id
+		WHERE
+		bl.board_idx = #{idx}
 		ORDER BY bl.created_at DESC
-		LIMIT #{size} OFFSET #{offset}
+		LIMIT #{size} OFFSET
+		#{offset}
 	</select>
 
 	<insert id="save" parameterType="com.example.board.dto.BoardDTO">
-			INSERT INTO tb_board (title, content, writer, user_id,  board_pw, view_cnt, created_at, updated_at, board_group_idx)
-			Values (#{title}, #{content}, #{writer}, #{userId}, #{boardPw}, 0, NOW(), NOW(), #{boardGroupIdx})
+		INSERT INTO tb_board (title,
+		content, writer, user_id, board_pw, view_cnt,
+		created_at, updated_at,
+		board_group_idx)
+		Values (#{title}, #{content}, #{writer}, #{userId},
+		#{boardPw}, 0, NOW(),
+		NOW(), #{boardGroupIdx})
 	</insert>
 
 
-	<select id="findById" parameterType="Long" resultType="com.example.board.dto.BoardDTO">
+	<select id="findById" parameterType="Long"
+		resultType="com.example.board.dto.BoardDTO">
 		SELECT * FROM tb_board WHERE idx = #{idx}
 	</select>
 
-	<update id="update" parameterType="com.example.board.dto.BoardDTO">
+	<update id="update"
+		parameterType="com.example.board.dto.BoardDTO">
 		UPDATE tb_board
 		SET title = #{title},
-			content = #{content},
-			updated_at = NOW()
+		content =
+		#{content},
+		updated_at = NOW()
 		where idx = #{idx}
 	</update>
 
 	<delete id="delete" parameterType="Long">
-		DELETE FROM tb_board WHERE idx = #{idx}
+		DELETE FROM tb_board WHERE idx
+		= #{idx}
 	</delete>
 
 	<update id="updateViewCnt" parameterType="Long">
 		UPDATE tb_board
-		SET view_cnt = view_cnt + 1
+		SET
+		view_cnt = view_cnt + 1
 		WHERE idx = #{idx}
 	</update>
 
 	<select id="count" resultType="int">
-		SELECT count(*) FROM tb_board
+		SELECT count(*)
+		FROM tb_board b
+		JOIN tb_board_group g
+		ON b.board_group_idx = g.board_group_idx
 		<where>
+			g.is_active = 1
+		
 			<if test="keyword != null and keyword != ''">
 				<choose>
 					<when test="searchType == 'title'">
-						AND title LIKE CONCAT('%', #{keyword}, '%')
+						AND b.title LIKE CONCAT('%', #{keyword}, '%')
 					</when>
 					<when test="searchType == 'content'">
-						AND content LIKE CONCAT('%', #{keyword}, '%')
+						AND b.content LIKE CONCAT('%', #{keyword}, '%')
 					</when>
 					<when test="searchType == 'writer'">
-						AND writer LIKE CONCAT('%', #{keyword}, '%')
+						AND b.writer LIKE CONCAT('%', #{keyword}, '%')
 					</when>
 				</choose>
+			</if>
+
+			<if test="boardGroupIdx != null">
+				AND b.board_group_idx = #{boardGroupIdx}
 			</if>
 		</where>
 	</select>

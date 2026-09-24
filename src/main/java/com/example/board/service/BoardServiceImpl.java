@@ -30,6 +30,16 @@ public class BoardServiceImpl implements BoardService {
 	public PageResponseDTO findAll(SearchDTO searchDTO) {
 		validateSortType(searchDTO);
 
+		Integer boardGroupIdx = searchDTO.getBoardGroupIdx();
+
+		if (boardGroupIdx != null) {
+			int result = boardGroupMapper.countActiveBoardGroup(boardGroupIdx);
+
+			if (result == 0) {
+				throw new IllegalArgumentException("존재하지 않거나 비활성화 된 게시판입니다.");
+			}
+		}
+
 		List<BoardDTO> list = boardMapper.findAll(searchDTO);
 		int totalCount = boardMapper.count(searchDTO);
 
@@ -61,7 +71,13 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public LikeResponseDTO btnLike(Long idx, String userId) {
 		LikeResponseDTO response = new LikeResponseDTO();
-
+		
+		BoardDTO board = findById(idx);
+		
+		if (board == null) {
+			throw new  IllegalArgumentException("좋아요를 변경할 수 없는 게시글입니다.");
+		}
+		
 		int exists = boardMapper.existsLike(idx, userId);
 
 		if (exists > 0) {
@@ -119,7 +135,19 @@ public class BoardServiceImpl implements BoardService {
 
 	@Override
 	public BoardDTO findById(Long idx) {
-		return boardMapper.findById(idx);
+		BoardDTO board = boardMapper.findById(idx);
+
+		if (board == null) {
+			return null;
+		}
+		int boardGroupIdx = board.getBoardGroupIdx();
+
+		int countActiveGroup = boardGroupMapper.countActiveBoardGroup(boardGroupIdx);
+
+		if (countActiveGroup == 0) {
+			return null;
+		}
+		return board;
 	}
 
 	@Override

@@ -1,102 +1,130 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>글 수정</title>
-    <style>
-        body { width: 800px; margin: 0 auto; padding: 20px; }
-        input, textarea { width: 100%; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
-        button { padding: 10px 20px; cursor: pointer;}
-    </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <h2>글 수정하기</h2>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+	<!DOCTYPE html>
+	<html>
 
-	<div id="updateFormArea">
-        <input type="hidden" id="idx" value="">
-
-        <label>제목</label>
-        <input type="text" id="title" required>
-
-        <label>작성자</label>
-        <input type="text" id="writer" readonly>
-
-        <label>내용</label>
-        <textarea id="content" rows="10"></textarea>
-
-        <div style="margin-top: 10px;">
-        	<button type="button" onclick="updateBoard()" style="background-color: #28a745; color: white; border: none;">수정</button>
-        	<button type="button" onclick="cancelUpdate()" style="padding: 10px 20px;">취소</button>
-        </div>
-	</div>
-
-    <script>
-    	$(document).ready(function(){
-		const urlParams = new URLSearchParams(window.location.search);
-
-		const idx = urlParams.get('idx');
-
-		$.ajax({
-			type: "GET",
-			url: "/board/getDetail",
-			data: {idx: idx},
-			dataType: "json",
-			success: function(board){
-
-				console.log(board);
-				$("#idx").val(board.idx);
-				$("#title").val(board.title);
-				$("#writer").val(board.writer);
-				$("#content").val(board.content);
-			},
-			error: function() {
-				alert("로딩 실패");
-			}
-		});
-    });
-
-    function updateBoard() {
-			var idx = $("#idx").val();
-			var title = $("#title").val().trim();
-			var writer = $("#writer").val().trim();
-			var content = $("#content").val().trim();
-
-			if(title === "" || content === "") {
-				alert("제목과 내용은 필수 입력입니다.");
-				return;
+	<head>
+		<meta charset="UTF-8">
+		<title>글 수정</title>
+		<style>
+			body {
+				width: 800px;
+				margin: 0 auto;
+				padding: 20px;
 			}
 
-    	$.ajax({
-			type: "POST",
-			url: "/board/update",
-			data: {
-					idx: idx,
-					title: title,
-					writer: writer,
-					content: content,
+			input,
+			textarea {
+				width: 100%;
+				margin-bottom: 10px;
+				padding: 10px;
+				box-sizing: border-box;
+			}
+
+			button {
+				padding: 10px 20px;
+				cursor: pointer;
+			}
+		</style>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	</head>
+
+	<body>
+		<h2>글 수정하기</h2>
+
+		<div id="updateFormArea">
+			<input type="hidden" id="idx" value="">
+
+			<label>제목</label>
+			<input type="text" id="title" required>
+
+			<label>작성자</label>
+			<input type="text" id="writer" readonly>
+
+			<label>내용</label>
+			<textarea id="content" rows="10"></textarea>
+
+			<div style="margin-top: 10px;">
+				<button type="button" onclick="updateBoard()"
+					style="background-color: #28a745; color: white; border: none;">수정</button>
+				<button type="button" onclick="cancelUpdate()" style="padding: 10px 20px;">취소</button>
+			</div>
+		</div>
+
+		<script>
+			const urlParams = new URLSearchParams(window.location.search);
+			const idx = urlParams.get('idx');
+			const page = urlParams.get('page') || 1;
+			const searchType = urlParams.get('searchType') || '';
+			const keyword = urlParams.get('keyword') || '';
+			const sortType = urlParams.get('sortType') || 'latest';
+			const boardGroupIdx = urlParams.get('boardGroupIdx');
+
+			let detailUrl = '/board/view?idx=' + idx + '&page=' + page + '&searchType=' + searchType + '&keyword=' + keyword + '&sortType=' + sortType;
+
+			if (boardGroupIdx) {
+				detailUrl += '&boardGroupIdx=' + boardGroupIdx;
+			}
+			$(document).ready(function () {
+
+
+				$.ajax({
+					type: "GET",
+					url: "/board/getDetail",
+					data: {idx: idx},
+					dataType: "json",
+					success: function (board) {
+
+						console.log(board);
+						$("#idx").val(board.idx);
+						$("#title").val(board.title);
+						$("#writer").val(board.writer);
+						$("#content").val(board.content);
 					},
-			success: function(result) {
+					error: function () {
+						alert("로딩 실패");
+					}
+				});
+			});
 
-				console.log(result);
-				if (result === "success") {
-					alert("수정 완료되었습니다.");
-					location.href = "/board/view?idx=" + idx;
-				} else {
-					alert("게시글을 수정할 수 없습니다.");
+			function updateBoard() {
+				var title = $("#title").val().trim();
+				var writer = $("#writer").val().trim();
+				var content = $("#content").val().trim();
+
+				if (title === "" || content === "") {
+					alert("제목과 내용은 필수 입력입니다.");
+					return;
 				}
-			},
-			error: function() {
-				alert("오류 발생")
-			}
-    	});
-    }
 
-    function cancelUpdate() {
-		var idx = $("#idx").val();
-		location.href = '/board/view?idx=' + idx;
-    }
-    </script>
-</body>
-</html>
+				$.ajax({
+					type: "POST",
+					url: "/board/update",
+					data: {
+						idx: idx,
+						title: title,
+						writer: writer,
+						content: content,
+					},
+					success: function (result) {
+
+						console.log(result);
+						if (result === "success") {
+							alert("수정 완료되었습니다.");
+							location.href = detailUrl;
+						} else {
+							alert("게시글을 수정할 수 없습니다.");
+						}
+					},
+					error: function () {
+						alert("오류 발생")
+					}
+				});
+			}
+
+			function cancelUpdate() {
+				location.href = detailUrl;
+			}
+		</script>
+	</body>
+
+	</html>

@@ -20,6 +20,7 @@ import com.example.board.dto.LikeResponseDTO;
 import com.example.board.dto.LikeUserDTO;
 import com.example.board.dto.SearchDTO;
 import com.example.board.security.CustomUserDetails;
+import com.example.board.service.BoardGroupService;
 import com.example.board.service.BoardService;
 import com.example.board.dto.MemberDTO;
 
@@ -29,18 +30,23 @@ public class BoardController {
 	@Autowired
 	private BoardService boardService;
 
+	@Autowired
+	private BoardGroupService boardGroupService;
+
 	private boolean isLogin(Authentication authentication) {
 		return authentication != null && authentication.isAuthenticated()
 				&& authentication.getPrincipal() instanceof CustomUserDetails;
 	}
 
 	@GetMapping("/")
-	public String home() {
+	public String home(Model model) {
+		model.addAttribute("boardGroups", boardGroupService.getActiveBoardGroups());
 		return "board/home";
 	}
 
 	@GetMapping("/board/list")
-	public String boardList() {
+	public String boardList(Model model) {
+		model.addAttribute("boardGroups", boardGroupService.getActiveBoardGroups());
 		return "board/home";
 	}
 
@@ -66,12 +72,17 @@ public class BoardController {
 	@ResponseBody
 	@GetMapping("/board/getDetail")
 	public ResponseEntity<BoardDTO> getBoardDetail(@RequestParam("idx") Long idx, Authentication authentication) {
-		boardService.updateViewCnt(idx);
+		
 		BoardDTO board = boardService.findById(idx);
 
 		if (board == null) {
 			return ResponseEntity.notFound().build();
 		}
+		boardService.updateViewCnt(idx);
+		
+		int viewCnt = board.getViewCnt(); 
+		board.setViewCnt(viewCnt + 1);
+		
 		int likeCnt = boardService.countLike(idx);
 		board.setLikeCnt(likeCnt);
 
@@ -97,8 +108,13 @@ public class BoardController {
 	public ResponseEntity<Map<String, Object>> getBoardList(@ModelAttribute SearchDTO searchDTO,
 			Authentication authentication) {
 		Map<String, Object> result = new HashMap<>();
-		result.put("boardData", boardService.findAll(searchDTO));
 
+		try {
+			result.put("boardData", boardService.findAll(searchDTO));
+		} catch (IllegalArgumentException ex) {
+			result.put("message", ex.getMessage());
+			return ResponseEntity.badRequest().body(result);
+		}
 		if (isLogin(authentication)) {
 			CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 			MemberDTO member = userDetails.getMemberDTO();
@@ -129,13 +145,19 @@ public class BoardController {
 			return ResponseEntity.ok(response);
 		}
 		String loginUserId = authentication.getName();
-		LikeResponseDTO result = boardService.btnLike(idx, loginUserId);
-		return ResponseEntity.ok(result);
+		
+		try {
+			LikeResponseDTO result = boardService.btnLike(idx, loginUserId);
+			return ResponseEntity.ok(result);
+		} catch (IllegalArgumentException ex) {
+			response.setMessage(ex.getMessage());
+			response.setStatus("fail");
+			return ResponseEntity.badRequest().body(response);
+		}
 	}
-
 	@ResponseBody
 	@GetMapping("/board/likeUsers")
-	public Map<String, Object> likeUsers(@RequestParam("idx") Long idx,
+	public ResponseEntity<Map<String, Object>> likeUsers(@RequestParam("idx") Long idx,
 			@RequestParam(value = "page", defaultValue = "1") int page,
 			@RequestParam(value = "size", defaultValue = "10") int size) {
 		Map<String, Object> resultMap = new HashMap<>();
@@ -143,8 +165,16 @@ public class BoardController {
 		if (idx == null) {
 			resultMap.put("status", "fail");
 			resultMap.put("message", "게시글 번호가 없습니다");
-			return resultMap;
+			return ResponseEntity.badRequest().body(resultMap);
 		}
+		
+		BoardDTO board = boardService.findById(idx);
+		if (board == null) {
+			resultMap.put("status", "fail");
+			resultMap.put("message", "조회할 수 없는 게시물입니다.");
+			return ResponseEntity.status(404).body(resultMap);
+		}
+		
 		if (page < 1) {
 			page = 1;
 		}
@@ -152,7 +182,7 @@ public class BoardController {
 			size = 10;
 		}
 		int totalCount = boardService.countLikeUsers(idx);
-		int totalPage = (int) Math.ceil((double) totalCount / page);
+		int totalPage = (int) Math.ceil((double) totalCount / size);
 
 		if (totalPage > 0 && page > totalPage) {
 			page = totalPage;
@@ -167,7 +197,7 @@ public class BoardController {
 		resultMap.put("totalCount", totalCount);
 		resultMap.put("totalPage", totalPage);
 
-		return resultMap;
+		return ResponseEntity.ok(resultMap);
 	}
 
 	@ResponseBody
@@ -214,7 +244,7 @@ public class BoardController {
 	}
 
 	@ResponseBody
-	@GetMapping("/board/delete")
+	@PostMapping("/board/delete")
 	public ResponseEntity<String> delete(@RequestParam("idx") Long idx, Authentication authentication) {
 
 		if (!isLogin(authentication)) {

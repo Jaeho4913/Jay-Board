@@ -12,4 +12,16 @@
 		is_active = 1
 	</select>
 
+	<select id="findActiveBoardGroups"
+		resultType="com.example.board.dto.BoardGroupDTO">
+		SELECT
+		board_group_idx AS boardGroupIdx,
+		board_group_name AS
+		boardGroupName
+		FROM tb_board_group
+		WHERE is_active = 1
+		ORDER BY
+		sort_order ASC, board_group_idx ASC
+	</select>
+
 </mapper>
