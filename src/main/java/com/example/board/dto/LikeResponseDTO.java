@@ -7,4 +7,5 @@ public class LikeResponseDTO {
 	private String status;
 	private boolean likeCheck;
 	private int  likeCnt;
+	private String message;
 }

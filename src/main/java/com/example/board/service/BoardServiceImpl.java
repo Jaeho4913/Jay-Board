@@ -71,7 +71,13 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public LikeResponseDTO btnLike(Long idx, String userId) {
 		LikeResponseDTO response = new LikeResponseDTO();
-
+		
+		BoardDTO board = findById(idx);
+		
+		if (board == null) {
+			throw new  IllegalArgumentException("좋아요를 변경할 수 없는 게시글입니다.");
+		}
+		
 		int exists = boardMapper.existsLike(idx, userId);
 
 		if (exists > 0) {

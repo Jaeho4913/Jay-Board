@@ -145,13 +145,19 @@ public class BoardController {
 			return ResponseEntity.ok(response);
 		}
 		String loginUserId = authentication.getName();
-		LikeResponseDTO result = boardService.btnLike(idx, loginUserId);
-		return ResponseEntity.ok(result);
+		
+		try {
+			LikeResponseDTO result = boardService.btnLike(idx, loginUserId);
+			return ResponseEntity.ok(result);
+		} catch (IllegalArgumentException ex) {
+			response.setMessage(ex.getMessage());
+			response.setStatus("fail");
+			return ResponseEntity.badRequest().body(response);
+		}
 	}
-
 	@ResponseBody
 	@GetMapping("/board/likeUsers")
-	public Map<String, Object> likeUsers(@RequestParam("idx") Long idx,
+	public ResponseEntity<Map<String, Object>> likeUsers(@RequestParam("idx") Long idx,
 			@RequestParam(value = "page", defaultValue = "1") int page,
 			@RequestParam(value = "size", defaultValue = "10") int size) {
 		Map<String, Object> resultMap = new HashMap<>();
@@ -159,8 +165,16 @@ public class BoardController {
 		if (idx == null) {
 			resultMap.put("status", "fail");
 			resultMap.put("message", "게시글 번호가 없습니다");
-			return resultMap;
+			return ResponseEntity.badRequest().body(resultMap);
 		}
+		
+		BoardDTO board = boardService.findById(idx);
+		if (board == null) {
+			resultMap.put("status", "fail");
+			resultMap.put("message", "조회할 수 없는 게시물입니다.");
+			return ResponseEntity.status(404).body(resultMap);
+		}
+		
 		if (page < 1) {
 			page = 1;
 		}
@@ -168,7 +182,7 @@ public class BoardController {
 			size = 10;
 		}
 		int totalCount = boardService.countLikeUsers(idx);
-		int totalPage = (int) Math.ceil((double) totalCount / page);
+		int totalPage = (int) Math.ceil((double) totalCount / size);
 
 		if (totalPage > 0 && page > totalPage) {
 			page = totalPage;
@@ -183,7 +197,7 @@ public class BoardController {
 		resultMap.put("totalCount", totalCount);
 		resultMap.put("totalPage", totalPage);
 
-		return resultMap;
+		return ResponseEntity.ok(resultMap);
 	}
 
 	@ResponseBody

@@ -206,6 +206,10 @@
 								}
 							},
 							error: function (xhr) {
+								if (xhr.status === 400) {
+									alert(xhr.responseJSON.message);
+									return;
+								}
 								handleAuthAjaxError(xhr, "오류가 발생했습니다.", "로그인 후 가능합니다.")
 							}
 						});
@@ -315,8 +319,15 @@
 									likeEnd = true;
 								}
 							},
-							error: function () {
-								alert("공감 목록을 불러오지 못했습니다.");
+							error: function (xhr) {
+								if(xhr.status === 404) {
+									likeEnd = true;
+									$("#likeModalBody").empty();
+									$("#likeModal").hide();
+									alert(xhr.responseJSON.message);
+									return;
+								}
+								alert("공감 목록을 불러오지 못했습니다.")
 							},
 							complete: function () {
 								likeLoading = false;
