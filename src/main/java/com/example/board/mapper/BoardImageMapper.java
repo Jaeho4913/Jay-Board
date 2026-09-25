@@ -8,4 +8,5 @@ import com.example.board.dto.BoardImageDTO;
 public interface BoardImageMapper {
 	int insert(BoardImageDTO boardImage);
 	BoardImageDTO findByBoardIdx(Long boardIdx);
+	int deleteByBoardIdx(Long boardIdx);
 }

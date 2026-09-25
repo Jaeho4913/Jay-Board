@@ -1,6 +1,5 @@
 package com.example.board.service;
 
-
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,6 @@ import com.example.board.dto.*;
 import com.example.board.mapper.BoardGroupMapper;
 import com.example.board.mapper.BoardImageMapper;
 import com.example.board.mapper.BoardMapper;
-
 
 @Slf4j
 @Service
@@ -189,20 +187,36 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
+	@Transactional
 	public void delete(Long idx) {
+		BoardImageDTO boardImage = boardImageMapper.findByBoardIdx(idx);
+		boardImageMapper.deleteByBoardIdx(idx);
 		boardMapper.delete(idx);
+		
+		if (boardImage != null) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+						try {
+							boardImageStorageService.delete(boardImage.getStoredName());
+						} catch (RuntimeException e) {
+							log.error("커밋 후 이미지 파일 정리 실패: {}", boardImage.getStoredName(), e);
+						}
+				}
+			});
+		}
 	}
-
+	
 	@Override
 	public void updateViewCnt(Long idx) {
 		boardMapper.updateViewCnt(idx);
 	}
-	
+
 	@Override
 	public BoardImageDTO findImageByBoardIdx(Long boardIdx) {
 		BoardDTO board = findById(boardIdx);
-		
-		if(board == null) {
+
+		if (board == null) {
 			return null;
 		}
 		return boardImageMapper.findByBoardIdx(boardIdx);

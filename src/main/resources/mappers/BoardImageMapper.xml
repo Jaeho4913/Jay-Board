@@ -25,5 +25,11 @@
 		FROM tb_board_image
 		WHERE board_idx = #{boardIdx}
 	</select>
+	
+	<delete id="deleteByBoardIdx">
+		DELETE 
+		FROM tb_board_image
+		WHERE board_idx = #{boardIdx}
+	</delete>
 
 </mapper>
