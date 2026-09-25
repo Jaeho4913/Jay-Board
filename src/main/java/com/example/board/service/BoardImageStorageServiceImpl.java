@@ -15,6 +15,8 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -139,7 +141,27 @@ public class BoardImageStorageServiceImpl implements BoardImageStorageService {
 			Files.deleteIfExists(target);
 		} catch (IOException e) {
 			throw new IllegalStateException("이미지 파일 삭제 중 오류가 발생했습니다.", e);
+		}	
+	}
+	
+	@Override
+	public Resource load(String storedName) {
+		if (storedName == null || storedName.isBlank()) {
+			throw new IllegalArgumentException("조회할 파일명이 없습니다.");
 		}
 		
+		Path directory = Path.of(uploadDir).toAbsolutePath().normalize();
+		Path target = directory.resolve(storedName).normalize();
+		
+		if(!directory.equals(target.getParent())) {
+			throw new IllegalArgumentException("허용되지 않은 파일 경로명입니다.");
+		}
+		
+		if (!Files.isRegularFile(target) || !Files.isReadable(target)) {
+			return null;
+		}
+		
+		return new FileSystemResource(target);
 	}
+	
 }

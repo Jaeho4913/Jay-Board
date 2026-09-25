@@ -197,4 +197,14 @@ public class BoardServiceImpl implements BoardService {
 	public void updateViewCnt(Long idx) {
 		boardMapper.updateViewCnt(idx);
 	}
+	
+	@Override
+	public BoardImageDTO findImageByBoardIdx(Long boardIdx) {
+		BoardDTO board = findById(boardIdx);
+		
+		if(board == null) {
+			return null;
+		}
+		return boardImageMapper.findByBoardIdx(boardIdx);
+	}
 }

@@ -1,6 +1,7 @@
 package com.example.board.controller; // 패키지명
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,17 +12,20 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.MediaType;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
 import com.example.board.dto.BoardDTO;
+import com.example.board.dto.BoardImageDTO;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.dto.LikeUserDTO;
 import com.example.board.dto.SearchDTO;
 import com.example.board.security.CustomUserDetails;
 import com.example.board.service.BoardGroupService;
+import com.example.board.service.BoardImageStorageService;
 import com.example.board.service.BoardService;
 import com.example.board.dto.MemberDTO;
 
@@ -33,6 +37,9 @@ public class BoardController {
 
 	@Autowired
 	private BoardGroupService boardGroupService;
+	
+	@Autowired
+	private BoardImageStorageService boardImageStorageService;
 
 	private boolean isLogin(Authentication authentication) {
 		return authentication != null && authentication.isAuthenticated()
@@ -265,5 +272,29 @@ public class BoardController {
 		boardService.delete(idx);
 		return ResponseEntity.ok("success");
 	}
-
+	@ResponseBody
+	@GetMapping("/board/image") 
+	public ResponseEntity<Resource> findImage(@RequestParam("idx") Long idx) {
+		BoardImageDTO image = boardService.findImageByBoardIdx(idx);
+		
+		if (image == null) {
+			return ResponseEntity.notFound().build();
+		}
+		
+		Resource resource = boardImageStorageService.load(image.getStoredName()); 
+		
+		if(resource == null) {
+			return ResponseEntity.notFound().build();
+		}
+		
+		MediaType mediaType;
+		
+		if (image.getStoredName().endsWith(".png")) {
+			mediaType = MediaType.IMAGE_PNG;
+		} else {
+			mediaType = MediaType.IMAGE_JPEG;
+		}
+		return ResponseEntity.ok().contentType(mediaType).body(resource);
+	}
+			
 }

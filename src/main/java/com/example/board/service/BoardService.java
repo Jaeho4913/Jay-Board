@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import com.example.board.dto.BoardDTO;
+import com.example.board.dto.BoardImageDTO;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.dto.LikeUserDTO;
 import com.example.board.dto.MemberDTO;
@@ -27,4 +28,5 @@ public interface BoardService {
 	List<LikeUserDTO> findLikeUsers(Long idx);
 	int countLikeUsers(Long idx);
 	List<MemberDTO> findLikeUsersPaging(Long idx, int size, int offset);
+	BoardImageDTO findImageByBoardIdx(Long boardIdx);
 }
