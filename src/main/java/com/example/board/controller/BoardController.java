@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -202,8 +203,9 @@ public class BoardController {
 
 	@ResponseBody
 	@PostMapping("/board/save")
-	public ResponseEntity<String> save(BoardDTO boardDTO, Authentication authentication) {
-
+	public ResponseEntity<String> save(BoardDTO boardDTO, 
+										Authentication authentication,
+										@RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
 		if (!isLogin(authentication)) {
 			return ResponseEntity.status(401).body("loginRequired");
 		}
@@ -213,7 +215,7 @@ public class BoardController {
 		boardDTO.setWriter(member.getUserName());
 
 		try {
-			boardService.save(boardDTO);
+			boardService.save(boardDTO, imageFile);
 			return ResponseEntity.ok("success");
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());

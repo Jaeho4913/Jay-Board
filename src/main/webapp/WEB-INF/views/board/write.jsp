@@ -45,7 +45,8 @@
 				<div style="text-align:right; margin-bottom:10px;">
 					<span id="contentLength">0</span>/3000
 				</div>
-
+				<label for="imageFile">대표 이미지(선택)</label>
+				<input type="file" id="imageFile" name="imageFile" accept=".jpg, .jpeg, .png">
 				<div style="margin-top: 10px;">
 					<button type="button" onclick="saveBoard()"
 						style="background-color: #007bff; color: white; border: none;">등록</button>
@@ -78,15 +79,25 @@
 						$("#content").focus();
 						return;
 					}
+					
+					const formData = new FormData();
+					
+					formData.append("title", title);
+					formData.append("content", content);
+					formData.append("boardGroupIdx", $("#boardGroupIdx").val());
 
+					const imageFile = $("#imageFile")[0].files[0];
+					
+					if(imageFile) {
+						formData.append("imageFile", imageFile);
+					}
+					
 					$.ajax({
 						type: "POST",
 						url: "/board/save",
-						data: {
-							title: title,
-							content: content,
-							boardGroupIdx: $("#boardGroupIdx").val()
-						},
+						data: formData,
+						processData: false,
+						contentType: false,
 						success: function (result) {
 							if (result === "success") {
 								alert("게시글이 성공적으로 등록되었습니다!")

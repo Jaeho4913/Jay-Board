@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.mapper.BoardImageMapper">
+	<insert id="insert"
+		parameterType="com.example.board.dto.BoardImageDTO">
+		INSERT INTO tb_board_image (
+			board_idx, original_name, stored_name, file_size
+		)
+		VALUES (
+			#{boardIdx}, #{originalName}, #{storedName}, #{fileSize}
+		)
+	</insert>
+
+</mapper>
