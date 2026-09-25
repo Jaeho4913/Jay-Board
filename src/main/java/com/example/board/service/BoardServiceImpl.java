@@ -182,7 +182,61 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public void update(BoardDTO boardDTO) {
+	@Transactional
+	public void update(BoardDTO boardDTO, MultipartFile imageFile, boolean deleteImage) {
+
+		BoardImageDTO oldImage = boardImageMapper.findByBoardIdx(boardDTO.getIdx());
+		boolean hasNewImage = imageFile != null && !imageFile.isEmpty();
+
+		if (deleteImage && hasNewImage) {
+			throw new IllegalArgumentException("이미지 교체와 삭제를 동시에 선택할 수 없습니다.");
+		}
+		
+		if (deleteImage && oldImage == null) {
+			throw new IllegalArgumentException("삭제할 이미지가 없습니다.");
+		}
+
+		BoardImageDTO newImage = null;
+
+		if (hasNewImage) {
+			newImage = boardImageStorageService.store(imageFile);
+			String newStoredName = newImage.getStoredName();
+
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCompletion(int status) {
+					if (status == STATUS_ROLLED_BACK) {
+						try {
+							boardImageStorageService.delete(newStoredName);
+						} catch (RuntimeException e) {
+							log.error("롤백 후 이미지 파일 정리 실패: {}", newStoredName, e);
+						}
+					}
+				}
+			});
+		}
+
+		if (hasNewImage || deleteImage) {
+			boardImageMapper.deleteByBoardIdx(boardDTO.getIdx());
+		}
+
+		if (newImage != null) {
+			newImage.setBoardIdx(boardDTO.getIdx());
+			boardImageMapper.insert(newImage);
+		}
+
+		if (oldImage != null && (hasNewImage || deleteImage)) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					try {
+						boardImageStorageService.delete(oldImage.getStoredName());
+					} catch (RuntimeException e) {
+						log.error("커밋 후 이미지 파일 정리 실패: {}", oldImage.getStoredName(), e);
+					}
+				}
+			});
+		}
 		boardMapper.update(boardDTO);
 	}
 
@@ -192,21 +246,21 @@ public class BoardServiceImpl implements BoardService {
 		BoardImageDTO boardImage = boardImageMapper.findByBoardIdx(idx);
 		boardImageMapper.deleteByBoardIdx(idx);
 		boardMapper.delete(idx);
-		
+
 		if (boardImage != null) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
-						try {
-							boardImageStorageService.delete(boardImage.getStoredName());
-						} catch (RuntimeException e) {
-							log.error("커밋 후 이미지 파일 정리 실패: {}", boardImage.getStoredName(), e);
-						}
+					try {
+						boardImageStorageService.delete(boardImage.getStoredName());
+					} catch (RuntimeException e) {
+						log.error("커밋 후 이미지 파일 정리 실패: {}", boardImage.getStoredName(), e);
+					}
 				}
 			});
 		}
 	}
-	
+
 	@Override
 	public void updateViewCnt(Long idx) {
 		boardMapper.updateViewCnt(idx);

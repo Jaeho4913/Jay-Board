@@ -43,6 +43,11 @@
 			<label>내용</label>
 			<textarea id="content" rows="10"></textarea>
 
+			<label for="imageFile">새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.</label>
+			<input type="file" id="imageFile" name="imageFile" accept=".jpg, .jpeg, .png">
+
+			<label for="deleteImage">기존 이미지 삭제</label>
+			<input type="checkbox" id="deleteImage" name="deleteImage" style="width: auto;">
 			<div style="margin-top: 10px;">
 				<button type="button" onclick="updateBoard()"
 					style="background-color: #28a745; color: white; border: none;">수정</button>
@@ -96,15 +101,26 @@
 					return;
 				}
 
+				const formData = new FormData();
+
+				formData.append("idx", idx);
+				formData.append("title", title);
+				formData.append("writer", writer);
+				formData.append("content", content);
+				formData.append("deleteImage", $("#deleteImage").prop("checked"));
+
+				const imageFile = $("#imageFile")[0].files[0];
+
+				if (imageFile) {
+					formData.append("imageFile", imageFile);
+				}
+
 				$.ajax({
 					type: "POST",
 					url: "/board/update",
-					data: {
-						idx: idx,
-						title: title,
-						writer: writer,
-						content: content,
-					},
+					data: formData,
+					processData: false,
+					contentType: false,
 					success: function (result) {
 
 						console.log(result);
@@ -115,8 +131,12 @@
 							alert("게시글을 수정할 수 없습니다.");
 						}
 					},
-					error: function () {
-						alert("오류 발생")
+					error: function (xhr) {
+						if (xhr.status === 400) {
+							alert(xhr.responseText);
+							return;
+						}
+						alert("오류 발생");
 					}
 				});
 			}

@@ -19,7 +19,7 @@ public interface BoardService {
 
 	void save(BoardDTO boardDTO, MultipartFile imageFile);
 	BoardDTO findById(Long idx);
-	void update(BoardDTO boardDTO);
+	void update(BoardDTO boardDTO, MultipartFile imageFile, boolean deleteImage);
 	void delete(Long idx);
 	void updateViewCnt(Long idx);
 	LikeResponseDTO btnLike(Long idx, String userId);

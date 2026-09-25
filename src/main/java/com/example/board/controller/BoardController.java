@@ -37,7 +37,7 @@ public class BoardController {
 
 	@Autowired
 	private BoardGroupService boardGroupService;
-	
+
 	@Autowired
 	private BoardImageStorageService boardImageStorageService;
 
@@ -80,17 +80,17 @@ public class BoardController {
 	@ResponseBody
 	@GetMapping("/board/getDetail")
 	public ResponseEntity<BoardDTO> getBoardDetail(@RequestParam("idx") Long idx, Authentication authentication) {
-		
+
 		BoardDTO board = boardService.findById(idx);
 
 		if (board == null) {
 			return ResponseEntity.notFound().build();
 		}
 		boardService.updateViewCnt(idx);
-		
-		int viewCnt = board.getViewCnt(); 
+
+		int viewCnt = board.getViewCnt();
 		board.setViewCnt(viewCnt + 1);
-		
+
 		int likeCnt = boardService.countLike(idx);
 		board.setLikeCnt(likeCnt);
 
@@ -153,7 +153,7 @@ public class BoardController {
 			return ResponseEntity.ok(response);
 		}
 		String loginUserId = authentication.getName();
-		
+
 		try {
 			LikeResponseDTO result = boardService.btnLike(idx, loginUserId);
 			return ResponseEntity.ok(result);
@@ -163,6 +163,7 @@ public class BoardController {
 			return ResponseEntity.badRequest().body(response);
 		}
 	}
+
 	@ResponseBody
 	@GetMapping("/board/likeUsers")
 	public ResponseEntity<Map<String, Object>> likeUsers(@RequestParam("idx") Long idx,
@@ -175,14 +176,14 @@ public class BoardController {
 			resultMap.put("message", "게시글 번호가 없습니다");
 			return ResponseEntity.badRequest().body(resultMap);
 		}
-		
+
 		BoardDTO board = boardService.findById(idx);
 		if (board == null) {
 			resultMap.put("status", "fail");
 			resultMap.put("message", "조회할 수 없는 게시물입니다.");
 			return ResponseEntity.status(404).body(resultMap);
 		}
-		
+
 		if (page < 1) {
 			page = 1;
 		}
@@ -210,9 +211,8 @@ public class BoardController {
 
 	@ResponseBody
 	@PostMapping("/board/save")
-	public ResponseEntity<String> save(BoardDTO boardDTO, 
-										Authentication authentication,
-										@RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+	public ResponseEntity<String> save(BoardDTO boardDTO, Authentication authentication,
+			@RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
 		if (!isLogin(authentication)) {
 			return ResponseEntity.status(401).body("loginRequired");
 		}
@@ -231,7 +231,9 @@ public class BoardController {
 
 	@ResponseBody
 	@PostMapping("/board/update")
-	public ResponseEntity<String> update(BoardDTO boardDTO, Authentication authentication) {
+	public ResponseEntity<String> update(BoardDTO boardDTO, Authentication authentication,
+			@RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+			@RequestParam(value = "deleteImage", defaultValue = "false") boolean deleteImage) {
 
 		if (!isLogin(authentication)) {
 			return ResponseEntity.ok("fail");
@@ -248,8 +250,13 @@ public class BoardController {
 		if (!loginUserId.equals(originalBoard.getUserId())) {
 			return ResponseEntity.ok("fail");
 		}
-		boardService.update(boardDTO);
-		return ResponseEntity.ok("success");
+		try {
+			boardService.update(boardDTO, imageFile, deleteImage);
+			return ResponseEntity.ok("success");
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());	
+		}
+
 	}
 
 	@ResponseBody
@@ -272,23 +279,24 @@ public class BoardController {
 		boardService.delete(idx);
 		return ResponseEntity.ok("success");
 	}
+
 	@ResponseBody
-	@GetMapping("/board/image") 
+	@GetMapping("/board/image")
 	public ResponseEntity<Resource> findImage(@RequestParam("idx") Long idx) {
 		BoardImageDTO image = boardService.findImageByBoardIdx(idx);
-		
+
 		if (image == null) {
 			return ResponseEntity.notFound().build();
 		}
-		
-		Resource resource = boardImageStorageService.load(image.getStoredName()); 
-		
-		if(resource == null) {
+
+		Resource resource = boardImageStorageService.load(image.getStoredName());
+
+		if (resource == null) {
 			return ResponseEntity.notFound().build();
 		}
-		
+
 		MediaType mediaType;
-		
+
 		if (image.getStoredName().endsWith(".png")) {
 			mediaType = MediaType.IMAGE_PNG;
 		} else {
@@ -296,5 +304,5 @@ public class BoardController {
 		}
 		return ResponseEntity.ok().contentType(mediaType).body(resource);
 	}
-			
+
 }
