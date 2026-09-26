@@ -34,7 +34,8 @@
 					<button type="button" id="btnSearch">검색</button>
 				</div>
 
-				<table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+				<table id="normalBoardTable" border="1"
+					style="width: 100%; border-collapse: collapse; text-align: center;">
 					<thead>
 						<tr style="background-color: #f2f2f2;">
 							<th style="padding: 10px;">번호</th>
@@ -68,6 +69,11 @@
 						</tr>
 					</tbody>
 				</table>
+
+				<div id="galleryBoardList" style="display: none;">
+
+
+				</div>
 
 				<div id="pagination" style="text-align: center; margin-top: 20px;">
 				</div>
@@ -206,7 +212,17 @@
 					}
 					authArea.html(html);
 				}
+
 				function setBoardList(boardData) {
+					if (boardData.boardType === 'GALLERY') {
+						$("#normalBoardTable").hide();
+						$("#galleryBoardList").show();
+						setGalleryBoardList(boardData);
+						return;
+					} else {
+						$("#normalBoardTable").show();
+						$("#galleryBoardList").hide();
+					}
 					const tbody = $('#boardList');
 					tbody.empty();
 
@@ -245,6 +261,35 @@
 			`;
 					});
 					tbody.append(html);
+				}
+
+				function setGalleryBoardList(boardData) {
+					$("#galleryBoardList").empty();
+					const items = boardData.boardList;
+					if (!items || items.length === 0) {
+						$("#galleryBoardList").text("등록된 게시글이 없습니다.");
+						return;
+					}
+					$.each(items, function (index, item) {
+						let detailUrl = '/board/view?idx=' + item.idx + '&page=' + boardData.searchDTO.page + '&searchType=' + boardData.searchDTO.searchType + '&keyword=' + encodeURIComponent(boardData.searchDTO.keyword) + '&sortType=' + boardData.searchDTO.sortType;
+						if (currentBoardGroupIdx) {
+							detailUrl += '&boardGroupIdx=' + currentBoardGroupIdx;
+						}
+						const imageUrl = "/board/image?idx=" + item.idx;
+						const card = $("<a>")
+							.attr("href", detailUrl)
+							.addClass("gallery-card");
+						const image = $("<img>")
+							.attr("src", imageUrl)
+							.attr("alt", "게시글 대표 이미지")
+							.addClass("gallery-image");
+						const title = $("<div>")
+							.addClass("gallery-title")
+							.text(item.title);
+						card.append(image, title);
+
+						$("#galleryBoardList").append(card);
+					});
 				}
 
 				function setPaging(boardData) {
