@@ -39,19 +39,27 @@ public class BoardServiceImpl implements BoardService {
 		validateSortType(searchDTO);
 
 		Integer boardGroupIdx = searchDTO.getBoardGroupIdx();
+		
+		String boardType = "NORMAL";
 
 		if (boardGroupIdx != null) {
-			int result = boardGroupMapper.countActiveBoardGroup(boardGroupIdx);
+			BoardGroupDTO boardGroup = boardGroupMapper.findActiveBoardGroupByIdx(boardGroupIdx);
 
-			if (result == 0) {
+			if (boardGroup == null) {
 				throw new IllegalArgumentException("존재하지 않거나 비활성화 된 게시판입니다.");
+			} else {
+				boardType = boardGroup.getBoardType();
 			}
 		}
 
 		List<BoardDTO> list = boardMapper.findAll(searchDTO);
 		int totalCount = boardMapper.count(searchDTO);
-
-		return new PageResponseDTO(searchDTO, totalCount, list);
+		
+		PageResponseDTO response = new PageResponseDTO(searchDTO, totalCount, list);
+		
+		response.setBoardType(boardType);
+		
+		return response;
 	}
 
 	private void validateSortType(SearchDTO searchDTO) {
