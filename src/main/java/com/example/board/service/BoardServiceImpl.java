@@ -135,9 +135,15 @@ public class BoardServiceImpl implements BoardService {
 		if (boardGroupIdx == null) {
 			throw new IllegalArgumentException("게시판을 선택해주세요");
 		}
-		int countActiveGroup = boardGroupMapper.countActiveBoardGroup(boardGroupIdx);
-		if (countActiveGroup == 0) {
-			throw new IllegalArgumentException("존재하지 않는 게시판입니다.");
+
+		BoardGroupDTO boardGroup = boardGroupMapper.findActiveBoardGroupByIdx(boardGroupIdx);
+
+		if (boardGroup == null) {
+			throw new IllegalArgumentException("존재하지 않거나 비활성화된 게시판입니다.");
+		}
+
+		if ("GALLERY".equals(boardGroup.getBoardType()) && (imageFile == null || imageFile.isEmpty())) {
+			throw new IllegalArgumentException("갤러리형 게시판은 이미지가 필수입니다.");
 		}
 		BoardImageDTO boardImage = boardImageStorageService.store(imageFile);
 
@@ -185,15 +191,31 @@ public class BoardServiceImpl implements BoardService {
 	@Transactional
 	public void update(BoardDTO boardDTO, MultipartFile imageFile, boolean deleteImage) {
 
+		BoardDTO originalBoard = boardMapper.findById(boardDTO.getIdx());
+
+		if (originalBoard == null) {
+			throw new IllegalArgumentException("수정할 수 없는 게시글입니다.");
+		}
+
+		BoardGroupDTO boardGroup = boardGroupMapper.findActiveBoardGroupByIdx(originalBoard.getBoardGroupIdx());
+
+		if (boardGroup == null) {
+			throw new IllegalArgumentException("존재하지 않거나 비활성화된 게시판입니다.");
+		}
+
 		BoardImageDTO oldImage = boardImageMapper.findByBoardIdx(boardDTO.getIdx());
 		boolean hasNewImage = imageFile != null && !imageFile.isEmpty();
 
 		if (deleteImage && hasNewImage) {
 			throw new IllegalArgumentException("이미지 교체와 삭제를 동시에 선택할 수 없습니다.");
 		}
-		
+
 		if (deleteImage && oldImage == null) {
 			throw new IllegalArgumentException("삭제할 이미지가 없습니다.");
+		}
+
+		if ("GALLERY".equals(boardGroup.getBoardType()) && (deleteImage || (oldImage == null && !hasNewImage))) {
+			throw new IllegalArgumentException("갤러리형 게시판은 이미지가 필수입니다. 이미지 교체나 유지해주세요.");
 		}
 
 		BoardImageDTO newImage = null;

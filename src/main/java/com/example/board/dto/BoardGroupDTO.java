@@ -6,4 +6,5 @@ import lombok.Data;
 public class BoardGroupDTO {
 	private Integer boardGroupIdx;
 	private String boardGroupName;
+	private String boardType;
 }
