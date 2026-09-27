@@ -4,6 +4,7 @@
 		<html>
 
 		<head>
+			<link rel="stylesheet" href="/css/board-list.css">
 			<meta charset="UTF-8">
 			<title>게시글 목록</title>
 			<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -216,11 +217,11 @@
 				function setBoardList(boardData) {
 					if (boardData.boardType === 'GALLERY') {
 						$("#normalBoardTable").hide();
-						$("#galleryBoardList").show();
+						$("#galleryBoardList").css("display", "grid");
 						setGalleryBoardList(boardData);
 						return;
 					} else {
-						$("#normalBoardTable").show();
+						$("#normalBoardTable").show()
 						$("#galleryBoardList").hide();
 					}
 					const tbody = $('#boardList');
@@ -305,6 +306,7 @@
 							.text(" 댓글 수 " + (item.replyCnt ?? 0));
 						
 						stats.append(viewCnt, likeCnt, replyCnt);
+						
 						card.append(image, title, writer, createdAt, stats);
 
 						$("#galleryBoardList").append(card);

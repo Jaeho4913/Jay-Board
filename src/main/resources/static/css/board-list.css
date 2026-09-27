@@ -1,0 +1,33 @@
+#galleryBoardList {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px;
+}
+.gallery-image {
+	width: 100%;
+	height: 200px;
+	object-fit: cover;
+}
+.gallery-card {
+	color: #333;
+	text-decoration: none;
+	border: 1px solid #ddd;
+	padding: 12px;
+}
+.gallery-title {
+	font-weight: bold;
+	margin-top: 12px;
+}
+.gallery-writer,
+.gallery-date {
+	font-size: 13px;
+	color: #666;
+	margin-top: 6px;
+}
+.gallery-stats {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 8px;
+	font-size: 12px;
+}
