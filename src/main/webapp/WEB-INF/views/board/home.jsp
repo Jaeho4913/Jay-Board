@@ -286,7 +286,13 @@
 						const title = $("<div>")
 							.addClass("gallery-title")
 							.text(item.title);
-						card.append(image, title);
+						const writer = $("<div>")
+							.addClass("gallery-writer")
+							.text(item.writer);
+						const createdAt = $("<div>")
+							.addClass("gallery-date")
+							.text(item.createdAt.replace('T', ' '));
+						card.append(image, title, writer, createdAt);
 
 						$("#galleryBoardList").append(card);
 					});
