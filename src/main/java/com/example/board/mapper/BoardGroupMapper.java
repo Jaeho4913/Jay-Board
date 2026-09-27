@@ -11,4 +11,5 @@ import com.example.board.dto.BoardGroupDTO;
 public interface BoardGroupMapper {
 	int countActiveBoardGroup(@Param("boardGroupIdx") Integer boardGroupIdx);
 	List<BoardGroupDTO> findActiveBoardGroups();
+	BoardGroupDTO findActiveBoardGroupByIdx(@Param("boardGroupIdx") Integer boardGroupIdx);
 }

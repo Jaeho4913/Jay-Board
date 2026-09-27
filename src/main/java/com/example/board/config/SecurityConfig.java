@@ -64,6 +64,7 @@ public class SecurityConfig {
 					"/board/getDetail",
 					"/board/replies",
 					"/board/likeUsers",
+					"/board/image",
 					"/member/save",
 					"/member/login",
 					"/member/find",

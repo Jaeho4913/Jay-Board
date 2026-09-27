@@ -78,6 +78,9 @@
 					<td id="v_content" style="height: 200px; vertical-align: top;">로딩중...</td>
 				</tr>
 			</table>
+			<div id="boardImageArea" style="display: none">
+				<img id="boardImage" alt="게시글 대표 이미지" style="max-width:100%; height:auto">
+			</div>
 			<div id="replyArea" style="margin-top:30px; border-top:1px solid #ddd; padding-top:20px;">
 
 				<h3>댓글</h3>
@@ -229,6 +232,10 @@
 
 						getLikeUsersScroll();
 					});
+					
+					$("#boardImage").on("load", function() {
+						$("#boardImageArea").show();
+					});
 
 					function getDetail() {
 						$.ajax({
@@ -243,6 +250,7 @@
 								$("#v_viewCnt").text(response.viewCnt);
 								$("#v_likeCnt").text(response.likeCnt);
 								$("#v_content").text(response.content);
+								$("#boardImage").attr("src","/board/image?idx=" +response.idx);
 
 								if (response.likeCheck === true) {
 									$("#btnLike").text("♥");

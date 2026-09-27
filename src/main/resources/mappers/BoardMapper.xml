@@ -151,7 +151,7 @@
 		#{offset}
 	</select>
 
-	<insert id="save" parameterType="com.example.board.dto.BoardDTO">
+	<insert id="save" parameterType="com.example.board.dto.BoardDTO" useGeneratedKeys="true" keyProperty="idx">
 		INSERT INTO tb_board (title,
 		content, writer, user_id, board_pw, view_cnt,
 		created_at, updated_at,

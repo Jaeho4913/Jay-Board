@@ -24,4 +24,16 @@
 		sort_order ASC, board_group_idx ASC
 	</select>
 
+	<select id="findActiveBoardGroupByIdx"
+		resultType="com.example.board.dto.BoardGroupDTO">
+		SELECT
+		board_group_idx AS boardGroupIdx,
+		board_group_name AS boardGroupName,
+		board_type AS boardType
+		FROM tb_board_group
+		WHERE
+		board_group_idx = #{boardGroupIdx}
+		AND is_active = 1
+	</select>
+
 </mapper>

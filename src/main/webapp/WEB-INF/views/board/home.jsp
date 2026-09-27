@@ -4,6 +4,7 @@
 		<html>
 
 		<head>
+			<link rel="stylesheet" href="/css/board-list.css">
 			<meta charset="UTF-8">
 			<title>게시글 목록</title>
 			<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -24,7 +25,19 @@
 					로딩중입니다.
 				</div>
 
-				<div style="margin-bottom: 10px;">
+				<div class="board-search-area"></div>
+					<span id="gallerySortArea" class="is-hidden">
+						<select id="gallerySort" aria-label="게시글 정렬">
+							<option value="latest">최신순</option>
+							<option value="oldest">오래된순</option>
+							<option value="viewDesc">조회수 높은순</option>
+							<option value="viewAsc">조회수 낮은순</option>
+							<option value="likeDesc">공감 높은순</option>
+							<option value="likeAsc">공감 낮은순</option>
+							<option value="replyDesc">댓글 많은순</option>
+							<option value="replyAsc">댓글 적은순</option>
+						</select>
+					</span>
 					<select id="searchType">
 						<option value="title">제목</option>
 						<option value="content">내용</option>
@@ -34,7 +47,9 @@
 					<button type="button" id="btnSearch">검색</button>
 				</div>
 
-				<table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+
+				<table id="normalBoardTable" border="1"
+					style="width: 100%; border-collapse: collapse; text-align: center;">
 					<thead>
 						<tr style="background-color: #f2f2f2;">
 							<th style="padding: 10px;">번호</th>
@@ -69,6 +84,11 @@
 					</tbody>
 				</table>
 
+				<div id="galleryBoardList" style="display: none;">
+
+
+				</div>
+
 				<div id="pagination" style="text-align: center; margin-top: 20px;">
 				</div>
 			</div>
@@ -81,14 +101,18 @@
 					let page = urlParams.get('page') || 1;
 					currentBoardGroupIdx = urlParams.get('boardGroupIdx');
 
-					$('#searchType').val(urlParams.get('searchType') || 'title');
-					$('#keyword').val(urlParams.get('keyword') || '');
+					$("#searchType").val(urlParams.get('searchType') || 'title');
+					$("#keyword").val(urlParams.get('keyword') || '');
 					currentSortType = urlParams.get('sortType') || 'latest';
-
+					$("#gallerySort").val(currentSortType);
+					
 					getBoardList(page);
 
-					$('#btnSearch').click(function () {
+					$("#btnSearch").click(function () {
 						getBoardList(1);
+					});
+					$("#gallerySort").on("change", function() {
+						changeSort($(this).val());
 					});
 					$('#keyword').keyup(function (e) {
 						if (e.keyCode == 13) {
@@ -206,7 +230,19 @@
 					}
 					authArea.html(html);
 				}
+
 				function setBoardList(boardData) {
+					if (boardData.boardType === 'GALLERY') {
+						$("#normalBoardTable").hide();
+						$("#galleryBoardList").css("display", "grid");
+						setGalleryBoardList(boardData);
+						$("#gallerySortArea").removeClass("is-hidden");
+						return;
+					} else {
+						$("#normalBoardTable").show()
+						$("#galleryBoardList").hide();
+						$("#gallerySortArea").addClass("is-hidden");
+					}
 					const tbody = $('#boardList');
 					tbody.empty();
 
@@ -245,6 +281,55 @@
 			`;
 					});
 					tbody.append(html);
+				}
+
+				function setGalleryBoardList(boardData) {
+					$("#galleryBoardList").empty();
+					const items = boardData.boardList;
+					if (!items || items.length === 0) {
+						$("#galleryBoardList").text("등록된 게시글이 없습니다.");
+						return;
+					}
+					$.each(items, function (index, item) {
+						let detailUrl = '/board/view?idx=' + item.idx + '&page=' + boardData.searchDTO.page + '&searchType=' + boardData.searchDTO.searchType + '&keyword=' + encodeURIComponent(boardData.searchDTO.keyword) + '&sortType=' + boardData.searchDTO.sortType;
+						if (currentBoardGroupIdx) {
+							detailUrl += '&boardGroupIdx=' + currentBoardGroupIdx;
+						}
+						const imageUrl = "/board/image?idx=" + item.idx;
+						const card = $("<a>")
+							.attr("href", detailUrl)
+							.addClass("gallery-card");
+						const image = $("<img>")
+							.attr("src", imageUrl)
+							.attr("alt", "게시글 대표 이미지")
+							.addClass("gallery-image");
+						const title = $("<div>")
+							.addClass("gallery-title")
+							.text(item.title);
+						const writer = $("<div>")
+							.addClass("gallery-writer")
+							.text(item.writer);
+						const createdAt = $("<div>")
+							.addClass("gallery-date")
+							.text(item.createdAt.replace('T', ' '));
+						const stats = $("<div>")
+							.addClass("gallery-stats");
+						const viewCnt = $("<span>")
+							.addClass("gallery-view")
+							.text("조회수 " + (item.viewCnt ?? 0));
+						const likeCnt = $("<span>")
+							.addClass("gallery-like")
+							.text(" 공감 " + (item.likeCnt ?? 0));
+						const replyCnt = $("<span>")
+							.addClass("gallery-reply")
+							.text(" 댓글 수 " + (item.replyCnt ?? 0));
+
+						stats.append(viewCnt, likeCnt, replyCnt);
+
+						card.append(image, title, writer, createdAt, stats);
+
+						$("#galleryBoardList").append(card);
+					});
 				}
 
 				function setPaging(boardData) {

@@ -13,7 +13,8 @@ public class PageResponseDTO {
 	private int startPage;
 	private int endPage;
 	private int pageCount = 10;
-
+	private String boardType = "NORMAL";
+	
 	public PageResponseDTO(SearchDTO searchDTO, int totalCount, List<BoardDTO> boardList) {
 		this.searchDTO = searchDTO;
 		this.totalCount = totalCount;
