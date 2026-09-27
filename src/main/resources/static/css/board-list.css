@@ -17,6 +17,9 @@
 .gallery-title {
 	font-weight: bold;
 	margin-top: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .gallery-writer,
 .gallery-date {
