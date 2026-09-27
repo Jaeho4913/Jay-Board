@@ -292,7 +292,20 @@
 						const createdAt = $("<div>")
 							.addClass("gallery-date")
 							.text(item.createdAt.replace('T', ' '));
-						card.append(image, title, writer, createdAt);
+						const stats = $("<div>")
+							.addClass("gallery-stats");
+						const viewCnt = $("<span>")
+							.addClass("gallery-view")
+							.text("조회수 " + (item.viewCnt ?? 0));
+						const likeCnt = $("<span>")
+							.addClass("gallery-like")
+							.text(" 공감 " + (item.likeCnt ?? 0));
+						const replyCnt = $("<span>")
+							.addClass("gallery-reply")
+							.text(" 댓글 수 " + (item.replyCnt ?? 0));
+						
+						stats.append(viewCnt, likeCnt, replyCnt);
+						card.append(image, title, writer, createdAt, stats);
 
 						$("#galleryBoardList").append(card);
 					});
