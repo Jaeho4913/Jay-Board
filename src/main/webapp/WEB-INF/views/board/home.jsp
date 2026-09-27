@@ -25,7 +25,19 @@
 					로딩중입니다.
 				</div>
 
-				<div style="margin-bottom: 10px;">
+				<div class="board-search-area"></div>
+					<span id="gallerySortArea" class="is-hidden">
+						<select id="gallerySort" aria-label="게시글 정렬">
+							<option value="latest">최신순</option>
+							<option value="oldest">오래된순</option>
+							<option value="viewDesc">조회수 높은순</option>
+							<option value="viewAsc">조회수 낮은순</option>
+							<option value="likeDesc">공감 높은순</option>
+							<option value="likeAsc">공감 낮은순</option>
+							<option value="replyDesc">댓글 많은순</option>
+							<option value="replyAsc">댓글 적은순</option>
+						</select>
+					</span>
 					<select id="searchType">
 						<option value="title">제목</option>
 						<option value="content">내용</option>
@@ -34,6 +46,7 @@
 					<input type="text" id="keyword" placeholder="검색어를 입력하세요" />
 					<button type="button" id="btnSearch">검색</button>
 				</div>
+
 
 				<table id="normalBoardTable" border="1"
 					style="width: 100%; border-collapse: collapse; text-align: center;">
@@ -88,14 +101,18 @@
 					let page = urlParams.get('page') || 1;
 					currentBoardGroupIdx = urlParams.get('boardGroupIdx');
 
-					$('#searchType').val(urlParams.get('searchType') || 'title');
-					$('#keyword').val(urlParams.get('keyword') || '');
+					$("#searchType").val(urlParams.get('searchType') || 'title');
+					$("#keyword").val(urlParams.get('keyword') || '');
 					currentSortType = urlParams.get('sortType') || 'latest';
-
+					$("#gallerySort").val(currentSortType);
+					
 					getBoardList(page);
 
-					$('#btnSearch').click(function () {
+					$("#btnSearch").click(function () {
 						getBoardList(1);
+					});
+					$("#gallerySort").on("change", function() {
+						changeSort($(this).val());
 					});
 					$('#keyword').keyup(function (e) {
 						if (e.keyCode == 13) {
@@ -219,10 +236,12 @@
 						$("#normalBoardTable").hide();
 						$("#galleryBoardList").css("display", "grid");
 						setGalleryBoardList(boardData);
+						$("#gallerySortArea").removeClass("is-hidden");
 						return;
 					} else {
 						$("#normalBoardTable").show()
 						$("#galleryBoardList").hide();
+						$("#gallerySortArea").addClass("is-hidden");
 					}
 					const tbody = $('#boardList');
 					tbody.empty();
@@ -304,9 +323,9 @@
 						const replyCnt = $("<span>")
 							.addClass("gallery-reply")
 							.text(" 댓글 수 " + (item.replyCnt ?? 0));
-						
+
 						stats.append(viewCnt, likeCnt, replyCnt);
-						
+
 						card.append(image, title, writer, createdAt, stats);
 
 						$("#galleryBoardList").append(card);

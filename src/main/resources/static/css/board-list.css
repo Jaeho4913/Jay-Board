@@ -34,3 +34,9 @@
 	margin-top: 8px;
 	font-size: 12px;
 }
+.is-hidden {
+	display: none;
+}
+.board-search-area {
+	margin-bottom: 10px;
+}
