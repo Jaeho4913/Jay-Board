@@ -2,6 +2,8 @@
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 16px;
+	max-width: 800px;
+	margin: 0 auto;
 }
 .gallery-image {
 	width: 100%;
@@ -39,4 +41,9 @@
 }
 .board-search-area {
 	margin-bottom: 10px;
+}
+#normalBoardtable {
+	width: 100%;
+	max-width: 800px;
+	margin: 0 auto;
 }

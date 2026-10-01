@@ -25,7 +25,7 @@
 					로딩중입니다.
 				</div>
 
-				<div class="board-search-area"></div>
+				<div class="board-search-area">
 					<span id="gallerySortArea" class="is-hidden">
 						<select id="gallerySort" aria-label="게시글 정렬">
 							<option value="latest">최신순</option>
