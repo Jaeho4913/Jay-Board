@@ -254,7 +254,7 @@ public class BoardController {
 			boardService.update(boardDTO, imageFile, deleteImage);
 			return ResponseEntity.ok("success");
 		} catch (IllegalArgumentException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());	
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 
 	}
@@ -282,14 +282,21 @@ public class BoardController {
 
 	@ResponseBody
 	@GetMapping("/board/image")
-	public ResponseEntity<Resource> findImage(@RequestParam("idx") Long idx) {
+	public ResponseEntity<Resource> findImage(@RequestParam("idx") Long idx,
+			@RequestParam(value = "thumbnail", defaultValue = "false") boolean thumbnail) {
 		BoardImageDTO image = boardService.findImageByBoardIdx(idx);
 
 		if (image == null) {
 			return ResponseEntity.notFound().build();
 		}
 
-		Resource resource = boardImageStorageService.load(image.getStoredName());
+		Resource resource;
+		
+		if (thumbnail) {
+			resource = boardImageStorageService.loadThumbnail(image.getStoredName());
+		} else {
+			resource = boardImageStorageService.load(image.getStoredName());
+		}
 
 		if (resource == null) {
 			return ResponseEntity.notFound().build();

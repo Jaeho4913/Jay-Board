@@ -1,5 +1,7 @@
 package com.example.board.service;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -27,7 +29,40 @@ public class BoardImageStorageServiceImpl implements BoardImageStorageService {
 
 	@Value("${app.upload.board-image-dir}")
 	private String uploadDir;
-	
+
+	private BufferedImage createThumbnail(BufferedImage image) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+
+		if (width <= 400 && height <= 400) {
+			return image;
+		}
+
+		double scale = Math.min(400.0 / width, 400.0 / height);
+
+		int thumbnailWidth = Math.max(1, (int) Math.round(scale * width));
+		int thumbnailHeight = Math.max(1, (int) Math.round(scale * height));
+
+		int imageType;
+
+		if (image.getColorModel().hasAlpha()) {
+			imageType = BufferedImage.TYPE_INT_ARGB;
+		} else {
+			imageType = BufferedImage.TYPE_INT_RGB;
+		}
+		BufferedImage thumbnail = new BufferedImage(thumbnailWidth, thumbnailHeight, imageType);
+
+		Graphics2D graphics = thumbnail.createGraphics();
+
+		try {
+			graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			graphics.drawImage(image, 0, 0, thumbnailWidth, thumbnailHeight, null);
+		} finally {
+			graphics.dispose();
+		}
+		return thumbnail;
+	}
+
 	@Override
 	public BoardImageDTO store(MultipartFile file) {
 
@@ -88,17 +123,27 @@ public class BoardImageStorageServiceImpl implements BoardImageStorageService {
 
 				BufferedImage image = reader.read(0);
 
+				BufferedImage thumbnail = createThumbnail(image);
+
 				String storedName = UUID.randomUUID().toString() + "." + format;
+				String thumbnailName = "thumb_" + storedName;
 
 				Path directory = Path.of(uploadDir).toAbsolutePath().normalize();
 				Files.createDirectories(directory);
 
 				Path target = directory.resolve(storedName).normalize();
+				Path thumbnailTarget = directory.resolve(thumbnailName).normalize();
 				try {
 					boolean written = ImageIO.write(image, format, target.toFile());
 
 					if (!written) {
 						throw new IllegalStateException("이미지를 저장할 수 없습니다.");
+					}
+
+					boolean thumbnailWritten = ImageIO.write(thumbnail, format, thumbnailTarget.toFile());
+
+					if (!thumbnailWritten) {
+						throw new IllegalStateException("썸네일을 저장할 수 없습니다.");
 					}
 
 					BoardImageDTO boardImage = new BoardImageDTO();
@@ -114,6 +159,11 @@ public class BoardImageStorageServiceImpl implements BoardImageStorageService {
 					} catch (IOException cleanUpException) {
 						e.addSuppressed(cleanUpException);
 					}
+					try {
+						Files.deleteIfExists(thumbnailTarget);
+					} catch (IOException cleanUpException) {
+						e.addSuppressed(cleanUpException);
+					}
 					throw e;
 				}
 			} finally {
@@ -123,45 +173,74 @@ public class BoardImageStorageServiceImpl implements BoardImageStorageService {
 			throw new IllegalStateException("이미지 파일을 읽는 중 오류가 발생했습니다.", e);
 		}
 	}
-	
+
 	@Override
 	public void delete(String storedName) {
 		if (storedName == null || storedName.isBlank()) {
 			throw new IllegalArgumentException("삭제할 파일명이 없습니다.");
 		}
-		
+
 		Path directory = Path.of(uploadDir).toAbsolutePath().normalize();
 		Path target = directory.resolve(storedName).normalize();
-		
-		if(!directory.equals(target.getParent())) {
+		Path thumbnailTarget = directory.resolve("thumb_" + storedName).normalize();
+
+		if (!directory.equals(target.getParent()) || !directory.equals(thumbnailTarget.getParent())) {
 			throw new IllegalArgumentException("허용되지 않은 파일 경로입니다.");
 		}
-		
+
+		IOException deleteException = null;
+
 		try {
 			Files.deleteIfExists(target);
 		} catch (IOException e) {
-			throw new IllegalStateException("이미지 파일 삭제 중 오류가 발생했습니다.", e);
-		}	
+			deleteException = e;
+		}
+		try {
+			Files.deleteIfExists(thumbnailTarget);
+		} catch (IOException e) {
+			if (deleteException == null) {
+				deleteException = e;
+			} else {
+				deleteException.addSuppressed(e);
+			}
+		}
+		if (deleteException != null) {
+			throw new IllegalStateException("이미지 파일 삭제 중 오류가 발생했습니다.", deleteException);
+		}
 	}
-	
+
 	@Override
 	public Resource load(String storedName) {
 		if (storedName == null || storedName.isBlank()) {
 			throw new IllegalArgumentException("조회할 파일명이 없습니다.");
 		}
-		
+
 		Path directory = Path.of(uploadDir).toAbsolutePath().normalize();
 		Path target = directory.resolve(storedName).normalize();
-		
-		if(!directory.equals(target.getParent())) {
+
+		if (!directory.equals(target.getParent())) {
 			throw new IllegalArgumentException("허용되지 않은 파일 경로명입니다.");
 		}
-		
+
 		if (!Files.isRegularFile(target) || !Files.isReadable(target)) {
 			return null;
 		}
-		
+
 		return new FileSystemResource(target);
 	}
 	
+	@Override
+	public Resource loadThumbnail(String storedName) {
+		if (storedName == null || storedName.isBlank()) {
+			throw new IllegalArgumentException("조회할 파일명이 없습니다.");
+		}
+		Resource thumbnail = load("thumb_" + storedName);
+		
+		if (thumbnail != null) {
+			return thumbnail;
+		} else {
+			return load(storedName);
+		}
+	}
+
 }

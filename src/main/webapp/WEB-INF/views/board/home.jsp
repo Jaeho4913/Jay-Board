@@ -295,7 +295,7 @@
 						if (currentBoardGroupIdx) {
 							detailUrl += '&boardGroupIdx=' + currentBoardGroupIdx;
 						}
-						const imageUrl = "/board/image?idx=" + item.idx;
+						const imageUrl = "/board/image?idx=" + item.idx + "&thumbnail=true";
 						const card = $("<a>")
 							.attr("href", detailUrl)
 							.addClass("gallery-card");
