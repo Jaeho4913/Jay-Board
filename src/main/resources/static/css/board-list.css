@@ -47,3 +47,21 @@
 	max-width: 800px;
 	margin: 0 auto;
 }
+.board-nav {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.board-nav-link {
+	padding: 8px 16px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	color: #333;
+	background-color: #fff;
+	text-decoration: none;
+}
+.board-nav-link:hover {
+	background-color: #f2f4f7;
+	border-color: #999;
+}

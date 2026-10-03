@@ -13,12 +13,13 @@
 		<body>
 			<div style="width: 800px; margin: 0 auto; text-align: center;">
 				<h2>목록</h2>
-
-				<c:forEach var="boardGroup" items="${boardGroups}">
-					<a href="/board/list?boardGroupIdx=${boardGroup.boardGroupIdx}">
-						<c:out value="${boardGroup.boardGroupName}" />
-					</a>
-				</c:forEach>
+				<nav class="board-nav">
+					<c:forEach var="boardGroup" items="${boardGroups}">
+						<a class="board-nav-link" href="/board/list?boardGroupIdx=${boardGroup.boardGroupIdx}">
+							<c:out value="${boardGroup.boardGroupName}" />
+						</a>
+					</c:forEach>
+				</nav>
 
 				<div id="authArea"
 					style="border: 2px solid #eee; padding: 15px; margin: 20px 0; border-radius: 10px; background-color: #f9f9f9;">
@@ -105,13 +106,13 @@
 					$("#keyword").val(urlParams.get('keyword') || '');
 					currentSortType = urlParams.get('sortType') || 'latest';
 					$("#gallerySort").val(currentSortType);
-					
+
 					getBoardList(page);
 
 					$("#btnSearch").click(function () {
 						getBoardList(1);
 					});
-					$("#gallerySort").on("change", function() {
+					$("#gallerySort").on("change", function () {
 						changeSort($(this).val());
 					});
 					$('#keyword').keyup(function (e) {
