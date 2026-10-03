@@ -12,4 +12,6 @@ public interface BoardImageStorageService {
 	void delete(String storedName);
 	
 	Resource load(String storedName);
+	
+	Resource loadThumbnail(String storedName);
 }
