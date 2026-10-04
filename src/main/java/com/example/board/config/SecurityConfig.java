@@ -5,6 +5,7 @@ import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -85,7 +86,9 @@ public class SecurityConfig {
 					"/board/reply/delete",
 					"/member/updatePw"
 				).authenticated()
-
+				
+				.requestMatchers(HttpMethod.GET, "/board/live/posts").permitAll()
+				
 				.anyRequest().denyAll()
 			)
 			.formLogin(form -> form
