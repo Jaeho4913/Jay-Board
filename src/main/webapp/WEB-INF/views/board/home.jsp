@@ -185,10 +185,12 @@
 						style="cursor:pointer;background-color:#28a745;color:white;border:none;padding:6px 12px;margin-right:5px;">
 						글쓰기
 					</button>
-					<button onclick="location.href='/member/logout'"
-						style="cursor:pointer;background-color:#dc3545;color:white;border:none;padding:6px 12px;">
-						로그아웃
-					</button>
+					<form action="/member/logout" method="post" class="logout-form">
+						<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+						<button type="submit" class="logout-button">
+							로그아웃
+						</button>
+					</form>	
 				</div>
 			</div>
 			`;
@@ -196,7 +198,7 @@
 						html += `
 			<form action="/member/loginPost" method="post"
 				style="display:flex; align-items:center; justify-content:center; gap:10px; margin:0;">
-
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 			<label>
 				ID:
 				<input type="text" name="userId" required

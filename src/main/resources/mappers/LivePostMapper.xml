@@ -14,13 +14,37 @@
 		p.created_at,
 		m.USER_NAME AS writer
 		FROM tb_live_post p
-		JOIN members m ON p.user_id = m.USER_ID
+		JOIN members m ON
+		p.user_id = m.USER_ID
 		where p.board_group_idx = #{boardGroupIdx}
 		<if test="beforePostIdx != null">
 			AND p.live_post_idx &lt; #{beforePostIdx}
 		</if>
 		ORDER BY p.live_post_idx DESC
 		LIMIT #{limit}
+	</select>
+
+	<insert id="insert"
+		parameterType="com.example.board.dto.LivePostDTO"
+		useGeneratedKeys="true" keyProperty="livePostIdx">
+		INSERT INTO tb_live_post
+		(board_group_idx, user_id, content)
+		VALUES
+		(#{boardGroupIdx}, #{userId}, #{content})
+	</insert>
+	
+	<select id="findById" resultType="com.example.board.dto.LivePostDTO">
+		SELECT
+		p.live_post_idx,
+		p.board_group_idx,
+		p.user_id,
+		p.content,
+		p.created_at,
+		m.USER_NAME AS writer
+		FROM tb_live_post p
+		JOIN members m ON
+		p.user_id = m.USER_ID
+		WHERE p.live_post_idx = #{livePostIdx}
 	</select>
 
 </mapper>

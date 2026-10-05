@@ -88,6 +88,7 @@ public class SecurityConfig {
 				).authenticated()
 				
 				.requestMatchers(HttpMethod.GET, "/board/live/posts").permitAll()
+				.requestMatchers(HttpMethod.POST, "/board/live/posts").authenticated()
 				
 				.anyRequest().denyAll()
 			)
