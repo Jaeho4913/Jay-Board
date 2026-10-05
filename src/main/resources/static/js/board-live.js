@@ -11,6 +11,8 @@ $(function() {
             return;
         }
         isLoading = true;
+		$("#livePostRetry").addClass("is-hidden");
+		sentinel.textContent = "글을 불러오는 중입니다.";
         const params = {
             boardGroupIdx: boardGroupIdx
         };
@@ -28,15 +30,20 @@ $(function() {
                 hasNext = response.hasNext;
 				if (!hasNext) {
 					if ($("#livePostList").children(".live-post").length === 0) {
-						sentinel.textContent = "등록된 글이 없습니다."
+						sentinel.textContent = "등록된 글이 없습니다.";
 					} else {
 						sentinel.textContent ="모든 글을 불러왔습니다.";
-					}
+					} 
 					observer.unobserve(sentinel);
+				} else {
+					sentinel.textContent = "이전 글 불러오기";
+					observer.observe(sentinel);
 				}
             },
             error: function(xhr) {
-                alert("라이브 글을 불러오지 못했습니다.")
+                sentinel.textContent = "글을 불러오지 못했습니다. 다시 시도해주세요.";
+				observer.unobserve(sentinel);
+				$("#livePostRetry").removeClass("is-hidden");
             },
             complete: function() {
                 isLoading = false;
@@ -60,6 +67,9 @@ $(function() {
             }
         });
     });
+	$("#livePostRetry").on("click", function() {
+		loadPosts();
+	});
     observer.observe(sentinel);
     loadPosts();
 });
