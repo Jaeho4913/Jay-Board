@@ -9,9 +9,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import java.util.Map;
@@ -19,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.example.board.dto.BoardDTO;
+import com.example.board.dto.BoardGroupDTO;
 import com.example.board.dto.BoardImageDTO;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.dto.LikeUserDTO;
@@ -53,8 +56,20 @@ public class BoardController {
 	}
 
 	@GetMapping("/board/list")
-	public String boardList(Model model) {
+	public String boardList(Model model,
+			@RequestParam(value = "boardGroupIdx", required = false) Integer boardGroupIdx) {
 		model.addAttribute("boardGroups", boardGroupService.getActiveBoardGroups());
+		if (boardGroupIdx != null) {
+			BoardGroupDTO boardGroup = boardGroupService.getActiveBoardGroup(boardGroupIdx);
+
+			if (boardGroup == null) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않거나 비활성화된 게시판입니다.");
+			}
+			if ("LIVE".equals(boardGroup.getBoardType())) {
+				model.addAttribute("boardGroup", boardGroup);
+				return "board/live";
+			}
+		}
 		return "board/home";
 	}
 
@@ -291,7 +306,7 @@ public class BoardController {
 		}
 
 		Resource resource;
-		
+
 		if (thumbnail) {
 			resource = boardImageStorageService.loadThumbnail(image.getStoredName());
 		} else {
