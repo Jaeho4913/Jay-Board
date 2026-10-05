@@ -27,7 +27,11 @@ $(function() {
                 nextCursor = response.nextCursor;
                 hasNext = response.hasNext;
 				if (!hasNext) {
-					sentinel.textContent ="모든 글을 불러왔습니다.";
+					if ($("#livePostList").children(".live-post").length === 0) {
+						sentinel.textContent = "등록된 글이 없습니다."
+					} else {
+						sentinel.textContent ="모든 글을 불러왔습니다.";
+					}
 					observer.unobserve(sentinel);
 				}
             },
