@@ -92,6 +92,7 @@ $(function() {
             return;
         }
         isSubmiting = true;
+		$("#livePostForm button[type='submit']").prop("disabled", true);
 
         $.ajax({
             type: "POST",
@@ -103,13 +104,25 @@ $(function() {
                 console.log(savedPost);
 				const card = createPostCard(savedPost);
 				$("#livePostList").prepend(card);
+				if (hasNext === false) {
+					sentinel.textContent = "모든 글을 불러왔습니다.";
+				}
                 $("#livePostContent").val("");
             },
             error: function(xhr) {
+				if (xhr.status === 401) {
+					alert("로그인 후 작성해주세요.");
+					return;
+				}
+				if (xhr.status === 400) {
+					alert(xhr.responseText);
+					return;
+				}
                 alert("라이브 글을 저장하지 못했습니다.");
             },
             complete: function() {
                 isSubmiting = false;
+				$("#livePostForm button[type='submit']").prop("disabled", false);
             }
         });
     });
