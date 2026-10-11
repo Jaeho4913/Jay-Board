@@ -15,4 +15,7 @@ public interface LivePostMapper {
 	int insert(LivePostDTO post);
 
 	LivePostDTO findById(@Param("livePostIdx") Long livePostIdx);
+	
+	int deleteByIdAndUserId(@Param("livePostIdx") Long livePostIdx,
+			@Param("userId") String userId);
 }

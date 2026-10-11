@@ -1,5 +1,6 @@
 $(function() {
     const boardGroupIdx = $("#livePostList").attr("data-board-group-idx");
+    const loginUserId = $("#livePostList").attr("data-login-user-id");
     const sentinel = document.getElementById("livePostSentinel");
 
     let nextCursor = null;
@@ -58,12 +59,16 @@ $(function() {
         const content = $("<div>").addClass("live-post-content").text(post.content);
         const date = $("<div>").addClass("live-post-date").text(post.createdAt);
         card.append(writer, content, date);
-		return card;
+        if (loginUserId && loginUserId === post.userId) {
+            const deleteButton = $("<button>").attr("type", "button").addClass("live-post-delete").text("삭제");
+            card.append(deleteButton);
+        }
+        return card;
     }
 
     function appendPosts(items) {
         items.forEach(function(post) {
-			const card = createPostCard(post);
+            const card = createPostCard(post);
             $("#livePostList").append(card);
         });
     }
@@ -77,6 +82,41 @@ $(function() {
     $("#livePostRetry").on("click", function() {
         loadPosts();
     });
+    $("#livePostList").on("click", ".live-post-delete", function() {
+        const card = $(this).closest(".live-post");
+        const livePostIdx = card.attr("data-post-idx");
+        if (!confirm("이 글을 삭제하시겠습니까?")) {
+            return;
+        }
+		const deleteButton = $(this).prop("disabled", true);
+        $.ajax({
+            type: "DELETE",
+            url: "/board/live/posts/" + livePostIdx,
+            success: function() { 
+				card.remove();
+				if ($("#livePostList").children(".live-post").length === 0 && !hasNext) {
+					sentinel.textContent = "등록된 글이 없습니다.";
+				} else if ($("#livePostList").children(".live-post").length === 0 && hasNext) {
+						loadPosts();
+					}
+			},
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    alert("로그인 후 삭제해주세요.");
+                    return;
+                }
+                if (xhr.status === 400) {
+                    alert(xhr.responseText);
+                    return;
+                }
+				alert("라이브 글을 삭제하지 못했습니다.");
+            },
+			complete: function() {
+				deleteButton.prop("disabled", false);
+			}
+        });
+    });
+
     $("#livePostForm").on("submit", function(event) {
         event.preventDefault();
         if (isSubmiting) {
@@ -92,7 +132,7 @@ $(function() {
             return;
         }
         isSubmiting = true;
-		$("#livePostForm button[type='submit']").prop("disabled", true);
+        $("#livePostForm button[type='submit']").prop("disabled", true);
 
         $.ajax({
             type: "POST",
@@ -102,27 +142,27 @@ $(function() {
             data: JSON.stringify({ boardGroupIdx: Number(boardGroupIdx), content: content }),
             success: function(savedPost) {
                 console.log(savedPost);
-				const card = createPostCard(savedPost);
-				$("#livePostList").prepend(card);
-				if (hasNext === false) {
-					sentinel.textContent = "모든 글을 불러왔습니다.";
-				}
+                const card = createPostCard(savedPost);
+                $("#livePostList").prepend(card);
+                if (hasNext === false) {
+                    sentinel.textContent = "모든 글을 불러왔습니다.";
+                }
                 $("#livePostContent").val("");
             },
             error: function(xhr) {
-				if (xhr.status === 401) {
-					alert("로그인 후 작성해주세요.");
-					return;
-				}
-				if (xhr.status === 400) {
-					alert(xhr.responseText);
-					return;
-				}
+                if (xhr.status === 401) {
+                    alert("로그인 후 작성해주세요.");
+                    return;
+                }
+                if (xhr.status === 400) {
+                    alert(xhr.responseText);
+                    return;
+                }
                 alert("라이브 글을 저장하지 못했습니다.");
             },
             complete: function() {
                 isSubmiting = false;
-				$("#livePostForm button[type='submit']").prop("disabled", false);
+                $("#livePostForm button[type='submit']").prop("disabled", false);
             }
         });
     });

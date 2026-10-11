@@ -1,6 +1,7 @@
 package com.example.board.controller; // 패키지명
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -57,7 +58,8 @@ public class BoardController {
 
 	@GetMapping("/board/list")
 	public String boardList(Model model,
-			@RequestParam(value = "boardGroupIdx", required = false) Integer boardGroupIdx) {
+			@RequestParam(value = "boardGroupIdx", required = false) Integer boardGroupIdx,
+			Authentication authentication) {
 		model.addAttribute("boardGroups", boardGroupService.getActiveBoardGroups());
 		if (boardGroupIdx != null) {
 			BoardGroupDTO boardGroup = boardGroupService.getActiveBoardGroup(boardGroupIdx);
@@ -67,6 +69,11 @@ public class BoardController {
 			}
 			if ("LIVE".equals(boardGroup.getBoardType())) {
 				model.addAttribute("boardGroup", boardGroup);
+				if (isLogin(authentication)) {
+					CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+					String userId = userDetails.getMemberDTO().getUserId();
+					model.addAttribute("loginUserId", userId);
+				}
 				return "board/live";
 			}
 		}

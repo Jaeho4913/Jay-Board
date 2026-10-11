@@ -110,4 +110,28 @@ public class LivePostServiceImpl implements LivePostService {
 		return savedPost;
 	}
 
+	@Override
+	public void deletePost(Long livePostIdx, String userId) {
+		if (livePostIdx == null || livePostIdx <= 0) {
+			throw new IllegalArgumentException("올바른 글 번호를 입력해주세요.");
+		}
+		if (userId == null || userId.isBlank()) {
+			throw new IllegalArgumentException("사용자 정보가 없습니다.");
+		}
+		LivePostDTO post = livePostMapper.findById(livePostIdx);
+		
+		if (post == null) {
+			throw new IllegalArgumentException("존재하지 않는 라이브 글입니다.");
+		}
+		if (!userId.equals(post.getUserId())) {
+			throw new IllegalArgumentException("본인이 작성한 글만 삭제할 수 있습니다.");
+		}
+		int deletedCount = livePostMapper.deleteByIdAndUserId(livePostIdx, userId);
+		
+		if(deletedCount != 1) {
+			throw new IllegalStateException("라이브 글 삭제에 실패했습니다");
+		}
+	}
+	
+
 }

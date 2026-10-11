@@ -30,10 +30,12 @@
 		INSERT INTO tb_live_post
 		(board_group_idx, user_id, content)
 		VALUES
-		(#{boardGroupIdx}, #{userId}, #{content})
+		(#{boardGroupIdx}, #{userId},
+		#{content})
 	</insert>
-	
-	<select id="findById" resultType="com.example.board.dto.LivePostDTO">
+
+	<select id="findById"
+		resultType="com.example.board.dto.LivePostDTO">
 		SELECT
 		p.live_post_idx,
 		p.board_group_idx,
@@ -42,9 +44,17 @@
 		p.created_at,
 		m.USER_NAME AS writer
 		FROM tb_live_post p
-		JOIN members m ON
+		JOIN
+		members m ON
 		p.user_id = m.USER_ID
-		WHERE p.live_post_idx = #{livePostIdx}
+		WHERE p.live_post_idx =
+		#{livePostIdx}
 	</select>
+
+	<delete id="deleteByIdAndUserId">
+		DELETE FROM tb_live_post
+		WHERE live_post_idx = #{livePostIdx}
+		AND user_id = #{userId}
+	</delete>
 
 </mapper>
