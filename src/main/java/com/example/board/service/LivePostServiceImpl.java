@@ -2,6 +2,7 @@ package com.example.board.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +10,7 @@ import com.example.board.dto.BoardGroupDTO;
 import com.example.board.dto.LivePostCreateRequestDTO;
 import com.example.board.dto.LivePostDTO;
 import com.example.board.dto.LivePostListResponseDTO;
+import com.example.board.event.LivePostCreatedEvent;
 import com.example.board.mapper.BoardGroupMapper;
 import com.example.board.mapper.LivePostMapper;
 
@@ -20,6 +22,7 @@ public class LivePostServiceImpl implements LivePostService {
 
 	private final LivePostMapper livePostMapper;
 	private final BoardGroupMapper boardGroupMapper;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Override
 	public LivePostListResponseDTO findPosts(Integer boardGroupIdx, Long beforePostIdx) {
@@ -107,6 +110,7 @@ public class LivePostServiceImpl implements LivePostService {
 		if (savedPost == null) {
 			throw new IllegalStateException("저장된 라이브 글을 조회할 수 없습니다.");
 		}
+		eventPublisher.publishEvent(new LivePostCreatedEvent(savedPost));
 		return savedPost;
 	}
 

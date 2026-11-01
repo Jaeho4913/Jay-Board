@@ -2,6 +2,34 @@ $(function() {
     const boardGroupIdx = $("#livePostList").attr("data-board-group-idx");
     const loginUserId = $("#livePostList").attr("data-login-user-id");
     const sentinel = document.getElementById("livePostSentinel");
+    const socketProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const socketUrl = socketProtocol + "//" + window.location.host + "/ws/live?boardGroupIdx=" + boardGroupIdx;
+    const socket = new WebSocket(socketUrl);
+    socket.addEventListener(
+        "open",
+        function() {
+            console.log("라이브 웹소켓 연결 성공");
+        }
+    );
+    socket.addEventListener(
+        "message",
+        function(event) {
+            const notification = JSON.parse(event.data);
+			if (notification.type === "POST_CREATED") {
+				const post = notification.post;
+				
+				if ($("#livePostList").children('[data-post-idx="' + post.livePostIdx + '"]').length > 0) {
+					return;
+				}
+				const card = createPostCard(post);
+				$("#livePostList").prepend(card);
+				if (!hasNext) {
+					sentinel.textContent = "모든 글을 불러왔습니다.";
+				}
+			}
+			console.log(notification);
+        }
+    );
 
     let nextCursor = null;
     let hasNext = true;
@@ -88,18 +116,18 @@ $(function() {
         if (!confirm("이 글을 삭제하시겠습니까?")) {
             return;
         }
-		const deleteButton = $(this).prop("disabled", true);
+        const deleteButton = $(this).prop("disabled", true);
         $.ajax({
             type: "DELETE",
             url: "/board/live/posts/" + livePostIdx,
-            success: function() { 
-				card.remove();
-				if ($("#livePostList").children(".live-post").length === 0 && !hasNext) {
-					sentinel.textContent = "등록된 글이 없습니다.";
-				} else if ($("#livePostList").children(".live-post").length === 0 && hasNext) {
-						loadPosts();
-					}
-			},
+            success: function() {
+                card.remove();
+                if ($("#livePostList").children(".live-post").length === 0 && !hasNext) {
+                    sentinel.textContent = "등록된 글이 없습니다.";
+                } else if ($("#livePostList").children(".live-post").length === 0 && hasNext) {
+                    loadPosts();
+                }
+            },
             error: function(xhr) {
                 if (xhr.status === 401) {
                     alert("로그인 후 삭제해주세요.");
@@ -109,11 +137,11 @@ $(function() {
                     alert(xhr.responseText);
                     return;
                 }
-				alert("라이브 글을 삭제하지 못했습니다.");
+                alert("라이브 글을 삭제하지 못했습니다.");
             },
-			complete: function() {
-				deleteButton.prop("disabled", false);
-			}
+            complete: function() {
+                deleteButton.prop("disabled", false);
+            }
         });
     });
 
@@ -142,8 +170,10 @@ $(function() {
             data: JSON.stringify({ boardGroupIdx: Number(boardGroupIdx), content: content }),
             success: function(savedPost) {
                 console.log(savedPost);
+				if ($("#livePostList").children('[data-post-idx="' + post.livePostIdx + '"]').length === 0) {
                 const card = createPostCard(savedPost);
                 $("#livePostList").prepend(card);
+				}
                 if (hasNext === false) {
                     sentinel.textContent = "모든 글을 불러왔습니다.";
                 }
