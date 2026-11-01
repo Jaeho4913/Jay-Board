@@ -37,4 +37,20 @@ public class LivePostEventListener {
 		}
 		
 	}
+	
+	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	public void handlePostDeleted(LivePostDeletedEvent event) {
+		
+		Map<String, Object> payload =  Map.of(
+				"type", "POST_DELETED",
+				"boardGroupIdx", event.getBoardGroupIdx(),
+				"livePostIdx", event.getLivePostIdx()
+				);
+		try {
+			String message = objectMapper.writeValueAsString(payload);
+			livePostWebSocketHandler.broadcastToBoard(event.getBoardGroupIdx(), message);
+		} catch (JsonProcessingException e) {
+			log.error("라이브 삭제 알림 변환 실패: {}", event.getLivePostIdx(), e);
+		}
+	}
 }

@@ -11,6 +11,7 @@ import com.example.board.dto.LivePostCreateRequestDTO;
 import com.example.board.dto.LivePostDTO;
 import com.example.board.dto.LivePostListResponseDTO;
 import com.example.board.event.LivePostCreatedEvent;
+import com.example.board.event.LivePostDeletedEvent;
 import com.example.board.mapper.BoardGroupMapper;
 import com.example.board.mapper.LivePostMapper;
 
@@ -115,6 +116,7 @@ public class LivePostServiceImpl implements LivePostService {
 	}
 
 	@Override
+	@Transactional
 	public void deletePost(Long livePostIdx, String userId) {
 		if (livePostIdx == null || livePostIdx <= 0) {
 			throw new IllegalArgumentException("올바른 글 번호를 입력해주세요.");
@@ -135,6 +137,9 @@ public class LivePostServiceImpl implements LivePostService {
 		if(deletedCount != 1) {
 			throw new IllegalStateException("라이브 글 삭제에 실패했습니다");
 		}
+		eventPublisher.publishEvent(
+				new LivePostDeletedEvent(post.getBoardGroupIdx(), livePostIdx)
+		);
 	}
 	
 

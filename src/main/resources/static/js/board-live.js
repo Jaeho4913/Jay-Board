@@ -27,6 +27,18 @@ $(function() {
 					sentinel.textContent = "모든 글을 불러왔습니다.";
 				}
 			}
+			if (notification.type === "POST_DELETED") {
+				$("#livePostList")
+					.children('[data-post-idx="' + notification.livePostIdx + '"]')
+					.remove();
+				if ($("#livePostList").children(".live-post").length === 0) {
+					if(hasNext) {
+						loadPosts();
+					} else {
+						sentinel.textContent = "등록된 글이 없습니다.";
+					}
+				}
+			}
 			console.log(notification);
         }
     );
@@ -170,7 +182,7 @@ $(function() {
             data: JSON.stringify({ boardGroupIdx: Number(boardGroupIdx), content: content }),
             success: function(savedPost) {
                 console.log(savedPost);
-				if ($("#livePostList").children('[data-post-idx="' + post.livePostIdx + '"]').length === 0) {
+				if ($("#livePostList").children('[data-post-idx="' + savedPost.livePostIdx + '"]').length === 0) {
                 const card = createPostCard(savedPost);
                 $("#livePostList").prepend(card);
 				}
