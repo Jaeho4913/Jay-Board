@@ -15,31 +15,12 @@ $(function() {
         "message",
         function(event) {
             const notification = JSON.parse(event.data);
-			if (notification.type === "POST_CREATED") {
-				const post = notification.post;
-				
-				if ($("#livePostList").children('[data-post-idx="' + post.livePostIdx + '"]').length > 0) {
-					return;
-				}
-				const card = createPostCard(post);
-				$("#livePostList").prepend(card);
-				if (!hasNext) {
-					sentinel.textContent = "모든 글을 불러왔습니다.";
-				}
-			}
-			if (notification.type === "POST_DELETED") {
-				$("#livePostList")
-					.children('[data-post-idx="' + notification.livePostIdx + '"]')
-					.remove();
-				if ($("#livePostList").children(".live-post").length === 0) {
-					if(hasNext) {
-						loadPosts();
-					} else {
-						sentinel.textContent = "등록된 글이 없습니다.";
-					}
-				}
-			}
-			console.log(notification);
+            if (!isAutoUpdate) {
+                pendingNotifications.push(notification);
+                return;
+            }
+			applyNotification(notification);
+            console.log(notification);
         }
     );
 
@@ -47,6 +28,35 @@ $(function() {
     let hasNext = true;
     let isLoading = false;
     let isSubmiting = false;
+    let isAutoUpdate = true;
+    const pendingNotifications = [];
+
+    function applyNotification(notification) {
+        if (notification.type === "POST_CREATED") {
+            const post = notification.post;
+
+            if ($("#livePostList").children('[data-post-idx="' + post.livePostIdx + '"]').length > 0) {
+                return;
+            }
+            const card = createPostCard(post);
+            $("#livePostList").prepend(card);
+            if (!hasNext) {
+                sentinel.textContent = "모든 글을 불러왔습니다.";
+            }
+        }
+        if (notification.type === "POST_DELETED") {
+            $("#livePostList")
+                .children('[data-post-idx="' + notification.livePostIdx + '"]')
+                .remove();
+            if ($("#livePostList").children(".live-post").length === 0) {
+                if (hasNext) {
+                    loadPosts();
+                } else {
+                    sentinel.textContent = "등록된 글이 없습니다.";
+                }
+            }
+        }
+    }
 
     function loadPosts() {
         if (isLoading || !hasNext) {
@@ -122,6 +132,16 @@ $(function() {
     $("#livePostRetry").on("click", function() {
         loadPosts();
     });
+    $("#liveAutoUpdate").on("change", function() {
+        isAutoUpdate = $(this).prop("checked");
+		if (isAutoUpdate) {
+			pendingNotifications.forEach(function(notification){
+				applyNotification(notification);
+			});
+			pendingNotifications.length = 0;
+		}
+        console.log("자동 업데이트", isAutoUpdate);
+    });
     $("#livePostList").on("click", ".live-post-delete", function() {
         const card = $(this).closest(".live-post");
         const livePostIdx = card.attr("data-post-idx");
@@ -182,10 +202,10 @@ $(function() {
             data: JSON.stringify({ boardGroupIdx: Number(boardGroupIdx), content: content }),
             success: function(savedPost) {
                 console.log(savedPost);
-				if ($("#livePostList").children('[data-post-idx="' + savedPost.livePostIdx + '"]').length === 0) {
-                const card = createPostCard(savedPost);
-                $("#livePostList").prepend(card);
-				}
+                if ($("#livePostList").children('[data-post-idx="' + savedPost.livePostIdx + '"]').length === 0) {
+                    const card = createPostCard(savedPost);
+                    $("#livePostList").prepend(card);
+                }
                 if (hasNext === false) {
                     sentinel.textContent = "모든 글을 불러왔습니다.";
                 }

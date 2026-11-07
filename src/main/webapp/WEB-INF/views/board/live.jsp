@@ -13,6 +13,9 @@
 			<h2>
 				<c:out value="${boardGroup.boardGroupName}" />
 			</h2>
+			<label>
+				<input type="checkbox" id="liveAutoUpdate" checked>
+			</label>
 			<form id="livePostForm">
 				<textarea id="livePostContent" rows="3" placeholder="내용을 입력해주세요."></textarea>
 				<button type="submit">등록</button>
