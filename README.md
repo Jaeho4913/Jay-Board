@@ -1,7 +1,7 @@
 # Jay-Board
 
 Spring Boot 기반 게시판 프로젝트입니다.
-기본 게시판 CRUD 기능에서 시작하여 회원 인증, 댓글, 좋아요, 페이징, Spring Security 기반 권한 처리, 관리자 페이지 구조까지 확장하는 것을 목표로 개발 중입니다.
+일반형·갤러리형·라이브형 게시판을 제공하며, 회원 인증, 댓글, 좋아요, 이미지 썸네일, 웹소켓 실시간 업데이트를 구현했습니다. 관리자 기능은 별도 애플리케이션인 [Jay-Board-Admin](https://github.com/Jaeho4913/Jay-Board-Admin)에서 관리합니다.
 
 - [사용자 게시판](http://3.35.138.85/)
 - [관리자 로그인](http://3.35.138.85:8081/admin/login)
@@ -24,6 +24,8 @@ Jay-Board는 게시글 작성, 조회, 수정, 삭제 기능을 중심으로 한
 * Spring Boot 3.5.8
 * Spring MVC
 * Spring Security
+* Spring WebSocket
+* Spring 트랜잭션 이벤트 (`AFTER_COMMIT`)
 * MyBatis
 * MariaDB / MySQL
 * Maven
@@ -41,6 +43,7 @@ Jay-Board는 게시글 작성, 조회, 수정, 삭제 기능을 중심으로 한
 * Linux Server
 * WAR 배포
 * systemd 기반 서비스 운영
+* Nginx 리버스 프록시 및 WebSocket 연결 전달
 * Git / GitHub
 
 ---
@@ -137,7 +140,55 @@ Jay-Board는 게시글 작성, 조회, 수정, 삭제 기능을 중심으로 한
 
 ---
 
-## 4. 관리자 페이지 설계
+### 3.6 게시판 유형 및 이미지
+
+| 유형 | 화면 및 용도 |
+| --- | --- |
+| NORMAL | 제목·작성자 등을 표시하는 일반 목록 |
+| GALLERY | 대표 이미지와 글 정보를 표시하는 카드 목록 |
+| LIVE | 짧은 글과 이모지를 실시간으로 주고받는 피드 |
+
+* JPG/JPEG·PNG 업로드: 파일당 최대 5MiB, 최대 1,000만 픽셀
+* 확장자 외에 실제 이미지 형식과 크기도 검사
+* 상세용 이미지와 목록용 썸네일을 별도 저장
+* 썸네일은 가로·세로 최대 400px로 비율을 유지하며, 작은 이미지는 확대하지 않음
+* 목록은 썸네일, 상세 화면은 상세용 이미지 사용
+* 기존 이미지에 썸네일이 없으면 상세용 이미지로 대체
+* 이미지 삭제 시 상세용 파일과 썸네일을 함께 정리
+
+수동 확인한 이미지 한 건에서 상세용 16.7KB 대비 썸네일은 10.9KB로, 목록 이미지 전송 크기가 약 34.7% 감소했습니다. 특정 이미지의 측정값이며 전체 이미지에 대한 평균은 아닙니다.
+
+### 3.7 LIVE 게시판
+
+* 비로그인 조회, 로그인 사용자 글 작성 및 본인 글 삭제
+* 이미지 첨부 없이 텍스트와 유니코드 이모지 지원
+* 빈 내용 차단 및 서버 기준 최대 500 유니코드 코드 포인트 검증
+* 최신순 목록과 20개 단위 커서 기반 무한 스크롤
+* `IntersectionObserver`로 이전 글 추가 조회
+* 작성·삭제는 HTTP API로 처리하고 WebSocket으로 변경 알림 전달
+* `@TransactionalEventListener(AFTER_COMMIT)`로 DB 커밋 후 알림 전송
+* 게시판별 연결 구분 및 동시 전송을 위한 세션 데코레이터 사용
+* 새 글·삭제 알림의 화면 반영과 새 글 중복 표시 방지
+* 자동 업데이트 기본 ON, OFF 동안 받은 알림은 보관 후 ON 전환 시 반영
+* 본인의 작성·삭제 결과는 OFF 상태에서도 HTTP 응답으로 반영
+* 연결 종료 시 3초 간격 재연결, 정책 위반 종료 코드 `1008`에서는 재시도 중단
+* 재연결 시 최신 20개부터 목록을 다시 조회해 놓친 변경 복구
+* OFF 상태에서 재연결된 경우 ON 전환 시 목록 동기화
+
+재연결 복구 시 이전에 펼쳐둔 목록과 스크롤 위치를 보존하지 않습니다. 대기 알림은 현재 페이지의 메모리에 보관하며, 영구 이벤트 이력 저장소는 사용하지 않습니다.
+
+| 요청 | 용도 |
+| --- | --- |
+| `GET /board/live/posts?boardGroupIdx=…&beforePostIdx=…` | 최신 또는 이전 글 조회 (`beforePostIdx` 생략 가능) |
+| `POST /board/live/posts` | 로그인 사용자 글 등록 |
+| `DELETE /board/live/posts/{livePostIdx}` | 작성자 본인 글 삭제 |
+| WebSocket `/ws/live?boardGroupIdx=…` | 활성 LIVE 게시판의 생성·삭제 알림 수신 |
+
+---
+
+## 4. 관리자 페이지 설계 및 확장 계획
+
+관리자 로그인, 홈·대시보드, 회원 관리, 게시판 그룹 관리는 별도 관리자 프로젝트에 구현되어 있습니다. 아래 내용은 향후 권한·운영 기능을 포함한 설계이며, 모든 항목이 구현된 것은 아닙니다. 구현 현황은 [관리자 README](https://github.com/Jaeho4913/Jay-Board-Admin#readme)를 참고하세요.
 
 관리자 페이지는 일반 사용자 계정과 분리된 관리자 계정 기반으로 설계합니다.
 
@@ -299,7 +350,7 @@ Jay-Board는 게시글 작성, 조회, 수정, 삭제 기능을 중심으로 한
 
 #### 5. 카테고리 관리
 
-추후 게시판을 카테고리 기반 구조로 확장할 예정입니다.
+게시판 그룹의 생성·수정·활성 상태·정렬 순서 및 NORMAL/GALLERY/LIVE 유형 관리를 구현했습니다. 아래 회원 유형별 접근 권한은 확장 계획입니다.
 
 ##### 카테고리 기능
 
@@ -445,35 +496,66 @@ Windows PowerShell 기준:
 .\mvnw.cmd clean package
 ```
 
+### DB 준비
+
+사용자·관리자 애플리케이션은 같은 게시판 DB를 사용합니다. LIVE 기능 배포 전에 부모 테이블 `tb_board_group`, `members`의 구조를 확인하고, `tb_live_post`가 없으면 [생성 SQL](sql/2026-10-04-create-live-post.sql)을 적용합니다. 이 파일은 보관용 SQL이며 애플리케이션 시작 시 자동 실행되지 않습니다.
+
 ### 서버 업로드
 
 ```powershell
-scp .\target\board-0.0.1-SNAPSHOT.war <DEPLOY_USER>@<SERVER_HOST>:/path/to/deploy/ROOT.war
+scp -i "<SSH_KEY_PATH>" .\target\board-0.0.1-SNAPSHOT.war <DEPLOY_USER>@<SERVER_HOST>:/tmp/jay-board-new.war
 ```
 
 ### 서버 접속
 
 ```powershell
-ssh <DEPLOY_USER>@<SERVER_HOST>
+ssh -i "<SSH_KEY_PATH>" <DEPLOY_USER>@<SERVER_HOST>
 ```
 
 ### 배포 실행
 
 ```bash
-/path/to/deploy.sh
+sudo cp -p <APP_WAR_PATH> <APP_WAR_PATH>.bak-$(date +%Y%m%d-%H%M%S)
+sudo systemctl stop <SERVICE_NAME>
+sudo cp /tmp/jay-board-new.war <APP_WAR_PATH>
+sudo systemctl start <SERVICE_NAME>
 ```
+
+각 명령의 성공을 확인하고 다음 명령을 실행합니다. `<APP_WAR_PATH>`는 서비스의 실제 실행 WAR 경로로 바꿉니다. 업로드 이미지 저장 폴더는 WAR와 별도 보관하며 배포 중 삭제하지 않습니다.
+
+### Nginx WebSocket 전달
+
+기존 게시판 `server` 블록 안에 WebSocket 경로를 전달합니다. 아래 예시는 애플리케이션이 로컬 8080 포트에서 실행되는 경우입니다.
+
+```nginx
+location /ws/ {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 300s;
+}
+```
+
+설정 백업 후 수정하고, `sudo nginx -t`가 통과한 경우에만 `sudo systemctl reload nginx`로 적용합니다. 서버에서 300초간 메시지가 없으면 연결이 종료될 수 있으며, 클라이언트는 재연결 시 목록을 동기화합니다.
 
 ### 로그 확인
 
 ```bash
-tail -f /path/to/app.log
+sudo journalctl -u <SERVICE_NAME> -n 60 --no-pager
 ```
 
 ### 서비스 상태 확인
 
 ```bash
-systemctl status <SERVICE_NAME>
+sudo systemctl status <SERVICE_NAME> --no-pager -l
 ```
+
+프로세스 실행 상태와 함께 현재 실행의 `Started …Application` 로그를 확인합니다. 배포 후에는 운영 관리자에서 활성 LIVE 게시판을 생성하고, 사용자 화면의 WebSocket 연결과 두 탭 사이의 생성·삭제 반영을 확인합니다. 사용자·관리자 WAR는 각각 배포해야 합니다.
 
 ---
 
@@ -481,11 +563,7 @@ systemctl status <SERVICE_NAME>
 
 공개 저장소에는 다음 정보를 포함하지 않습니다.
 
-* 실제 서버 IP
-* 서버 계정명
 * 서버 접속 비밀번호 또는 SSH Key
-* 실제 배포 경로
-* 실제 로그 파일 경로
 * DB 접속 정보
 * 관리자 계정 ID
 * 관리자 초기 비밀번호
@@ -507,23 +585,23 @@ systemctl status <SERVICE_NAME>
 * 좋아요 사용자 목록 모달
 * 댓글 CRUD
 * 댓글 페이징
+* NORMAL/GALLERY/LIVE 게시판 유형
+* 이미지 검증·저장 및 목록용 썸네일 분리
+* LIVE 글 등록·본인 삭제·20개 단위 무한 스크롤
+* DB 커밋 후 WebSocket 생성·삭제 알림 및 화면 반영
+* 자동 업데이트 ON/OFF 및 대기 알림 반영
+* WebSocket 자동 재연결 및 최신 목록 동기화
 * 관리자 계정 테이블 설계 및 생성
-* 관리자 계정 기반 인증 구조 설계
-* 관리자 페이지 메뉴 구조 설계
+* 별도 관리자 애플리케이션의 로그인·홈·대시보드·회원 관리
+* 관리자 게시판 그룹 관리 및 유형 변경·삭제 검증
 
 ### 진행 중
 
-* 관리자 로그인 구조 구현
-* 관리자 Security FilterChain 분리
-* 관리자 대시보드 화면 구성
-* 관리자 통계 조회 기능 설계
+* 관리자 게시글·댓글 관리
 
 ### 예정
 
-* 관리자 회원 관리
-* 관리자 게시글 관리
-* 관리자 댓글 관리
-* 카테고리 관리
+* 관리자 상세 통계
 * 회원 유형별 카테고리 접근 권한
 * 운영 로그
 * 관리자 등급별 메뉴 노출 제어
