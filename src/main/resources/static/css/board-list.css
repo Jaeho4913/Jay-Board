@@ -65,3 +65,15 @@
 	background-color: #f2f4f7;
 	border-color: #999;
 }
+.logout-form {
+    display: inline-block;
+    margin: 0;
+}
+
+.logout-button {
+    cursor: pointer;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+}

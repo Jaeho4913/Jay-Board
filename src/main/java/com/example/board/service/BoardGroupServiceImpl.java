@@ -19,4 +19,9 @@ public class BoardGroupServiceImpl implements BoardGroupService{
 	public List<BoardGroupDTO>getActiveBoardGroups() {
 		return boardGroupMapper.findActiveBoardGroups();
 	}
+
+	@Override
+	public BoardGroupDTO getActiveBoardGroup(Integer boardGroupIdx) {
+		return boardGroupMapper.findActiveBoardGroupByIdx(boardGroupIdx);
+	}
 }

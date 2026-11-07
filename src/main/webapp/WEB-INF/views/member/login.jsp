@@ -16,6 +16,7 @@
 			</c:if>
 
 			<form id="saveForm" action="/member/loginPost" method="post">
+				<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 				<p>
 					<label>아이디 :</label>
 					<input type="text" name="userId" required>
