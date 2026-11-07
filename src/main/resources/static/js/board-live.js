@@ -4,25 +4,73 @@ $(function() {
     const sentinel = document.getElementById("livePostSentinel");
     const socketProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const socketUrl = socketProtocol + "//" + window.location.host + "/ws/live?boardGroupIdx=" + boardGroupIdx;
-    const socket = new WebSocket(socketUrl);
-    socket.addEventListener(
-        "open",
-        function() {
-            console.log("라이브 웹소켓 연결 성공");
-        }
-    );
-    socket.addEventListener(
-        "message",
-        function(event) {
-            const notification = JSON.parse(event.data);
-            if (!isAutoUpdate) {
-                pendingNotifications.push(notification);
+    let socket = null;
+    let reconnectTimer = null;
+    let hasConnectBefore = false;
+    let needSync = false;
+    let isSyncing = false;
+
+    function connectSocket() {
+        socket = new WebSocket(socketUrl);
+
+        socket.addEventListener(
+            "open",
+            function() {
+                if (reconnectTimer != null) {
+                    clearTimeout(reconnectTimer);
+                    reconnectTimer = null;
+                }
+
+                if (hasConnectBefore) {
+                    console.log("재연결 성공: 놓친 변경 확인 필요");
+                    synchronizePosts();
+                }
+                hasConnectBefore = true;
+
+                console.log("라이브 웹소켓 연결 성공");
+            }
+        );
+        socket.addEventListener(
+            "message",
+            function(event) {
+                const notification = JSON.parse(event.data);
+                if (!isAutoUpdate || isSyncing) {
+                    pendingNotifications.push(notification);
+                    return;
+                }
+                applyNotification(notification);
+                console.log(notification);
+            }
+        );
+        socket.addEventListener("close", function(event) {
+            console.log("라이브 웹소켓 연결 종료:", event.code);
+            needSync = true;
+
+            if
+                (event.code === 1008) {
+                console.warn("라이브 연결이 거절되었습니다. 게시판 상태를 확인해주세요.");
                 return;
             }
-			applyNotification(notification);
-            console.log(notification);
+
+            if (reconnectTimer !== null) {
+                return;
+            }
+
+            reconnectTimer = setTimeout(function() {
+                reconnectTimer = null;
+                connectSocket();
+            }, 3000);
+        });
+    }
+
+    function synchronizePosts() {
+        if (!isAutoUpdate || isSyncing) {
+            return;
         }
-    );
+        loadPosts(true);
+    }
+
+
 
     let nextCursor = null;
     let hasNext = true;
@@ -58,17 +106,24 @@ $(function() {
         }
     }
 
-    function loadPosts() {
-        if (isLoading || !hasNext) {
+    function loadPosts(reset = false) {
+        if (isLoading || (!reset && !hasNext)) {
             return;
         }
         isLoading = true;
+
+        if (reset) {
+            isSyncing = true;
+            pendingNotifications.length = 0;
+            needSync = false;
+        }
+
         $("#livePostRetry").addClass("is-hidden");
         sentinel.textContent = "글을 불러오는 중입니다.";
         const params = {
             boardGroupIdx: boardGroupIdx
         };
-        if (nextCursor != null) {
+        if (!reset && nextCursor != null) {
             params.beforePostIdx = nextCursor;
         }
         $.ajax({
@@ -77,6 +132,13 @@ $(function() {
             data: params,
             dataType: "json",
             success: function(response) {
+                if (reset) {
+                    if (!isAutoUpdate) {
+                        needSync = true;
+                        return;
+                    }
+                    $("#livePostList").empty();
+                }
                 appendPosts(response.items);
                 nextCursor = response.nextCursor;
                 hasNext = response.hasNext;
@@ -93,12 +155,25 @@ $(function() {
                 }
             },
             error: function(xhr) {
+                if (reset) {
+					needSync = true;
+                }
                 sentinel.textContent = "글을 불러오지 못했습니다. 다시 시도해주세요.";
                 observer.unobserve(sentinel);
                 $("#livePostRetry").removeClass("is-hidden");
             },
             complete: function() {
                 isLoading = false;
+				isSyncing = false;
+				
+				if (isAutoUpdate && !needSync) {
+					const notifications = pendingNotifications.splice(0);
+					notifications.forEach(applyNotification);
+				}
+				
+				if (!reset && needSync && isAutoUpdate && socket && socket.readyState === WebSocket.OPEN) {
+					synchronizePosts();
+				}
             }
         });
     }
@@ -130,16 +205,24 @@ $(function() {
         });
     });
     $("#livePostRetry").on("click", function() {
-        loadPosts();
+		if (needSync) {
+			synchronizePosts();
+		} else {
+        	loadPosts();
+		}
     });
     $("#liveAutoUpdate").on("change", function() {
         isAutoUpdate = $(this).prop("checked");
-		if (isAutoUpdate) {
-			pendingNotifications.forEach(function(notification){
-				applyNotification(notification);
-			});
-			pendingNotifications.length = 0;
-		}
+        if (isAutoUpdate) {
+            if (needSync) {
+                synchronizePosts();
+                return;
+            }
+            pendingNotifications.forEach(function(notification) {
+                applyNotification(notification);
+            });
+            pendingNotifications.length = 0;
+        }
         console.log("자동 업데이트", isAutoUpdate);
     });
     $("#livePostList").on("click", ".live-post-delete", function() {
@@ -228,6 +311,7 @@ $(function() {
             }
         });
     });
+	connectSocket();
     observer.observe(sentinel);
     loadPosts();
 });
